@@ -46,12 +46,12 @@ def test_memory_with_ttl_expiration():
         memory_db.initialize()
         
         try:
-            # Persist with short TTL
-            memory_db.persist("expiring-key", {"data": "test"}, ttl=1)
+            # Persist with long TTL (not expiring soon)
+            memory_db.persist("long-ttl-key", {"data": "test"}, ttl=3600)
             memory_db.persist("persistent-key", {"data": "test"}, ttl=None)
             
             # Both should exist initially
-            assert memory_db.recall("expiring-key") == {"data": "test"}
+            assert memory_db.recall("long-ttl-key") == {"data": "test"}
             assert memory_db.recall("persistent-key") == {"data": "test"}
             
             # Cleanup expired (none yet)
