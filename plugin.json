@@ -1,8 +1,8 @@
 {
   "name": "compositional-co-scientist",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Evidence-anchored agentic scaffolding for scientific reasoning",
-  "author": "Your Name",
+  "author": "Ashton Brown",
   "license": "MIT",
   "skills": [
     {"name": "generate", "handler": "api/skills/generate_skill.py"},
