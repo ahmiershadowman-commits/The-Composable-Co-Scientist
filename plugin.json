@@ -1,0 +1,24 @@
+{
+  "name": "compositional-co-scientist",
+  "version": "1.0.0",
+  "description": "Evidence-anchored agentic scaffolding for scientific reasoning",
+  "author": "Your Name",
+  "license": "MIT",
+  "skills": [
+    {"name": "generate", "handler": "api/skills/generate_skill.py"},
+    {"name": "evaluate", "handler": "api/skills/evaluate_skill.py"},
+    {"name": "critique", "handler": "api/skills/critique_skill.py"},
+    {"name": "select", "handler": "api/skills/select_skill.py"},
+    {"name": "retrieve", "handler": "api/skills/retrieve_skill.py"},
+    {"name": "act", "handler": "api/skills/act_skill.py"},
+    {"name": "synthesize", "handler": "api/skills/synthesize_skill.py"},
+    {"name": "memory", "handler": "api/skills/memory_skill.py"},
+    {"name": "log", "handler": "api/skills/log_skill.py"}
+  ],
+  "commands": [
+    {"name": "/generate", "handler": "api/commands/handlers.py:handle_generate"},
+    {"name": "/evaluate", "handler": "api/commands/handlers.py:handle_evaluate"},
+    {"name": "/synthesize", "handler": "api/commands/handlers.py:handle_synthesize"}
+  ],
+  "hosts": ["claude-code", "qwen-code", "gemini-cli"]
+}
