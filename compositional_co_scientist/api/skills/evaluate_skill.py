@@ -5,10 +5,16 @@ Triggers the EVALUATE primitive (P2) with constraint C1 (evaluator independence)
 """
 from typing import Dict, Any, List
 import json
+import uuid
 
 from compositional_co_scientist.core.primitives.evaluate import evaluate as evaluate_primitive
 from compositional_co_scientist.core.models.candidate import Candidate
 from compositional_co_scientist.core.models.score import Score
+from compositional_co_scientist.core.constraints.c4_log_completeness import (
+    log_start_evaluation,
+    log_end_evaluation,
+)
+from compositional_co_scientist.api.skills.log_skill import log as log_skill
 
 
 EVALUATE_PROMPT = """Evaluate the following candidate hypotheses against the provided rubric.
@@ -88,8 +94,9 @@ def _parse_llm_response(response_text: str, candidate_ids: List[str], rubric: Di
         ]
 
 
-def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float], 
-             evaluator_model: str, llm_response: str = None) -> Dict[str, Any]:
+def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float],
+             evaluator_model: str, llm_response: str = None,
+             enable_c4_logging: bool = True) -> Dict[str, Any]:
     """Evaluate candidates against a rubric using an evaluator model.
 
     Args:
@@ -97,11 +104,13 @@ def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float],
         rubric: Dictionary of evaluation criteria and their weights.
         evaluator_model: Name/ID of the model used for evaluation.
         llm_response: Optional pre-computed LLM response (for testing/host integration).
+        enable_c4_logging: If True, log EVALUATE operation for C4 compliance.
 
     Returns:
         Dictionary containing:
             - scores: List of Score objects for each candidate
             - calibration: Calibration factor for the scores (default 1.0)
+            - c4_logged: True if operation was logged for audit
 
     Raises:
         ValueError: If evaluator_model is not specified (C1 constraint).
@@ -109,14 +118,21 @@ def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float],
     if not evaluator_model:
         raise ValueError("C1 constraint: evaluator_model must be specified (evaluator independence required)")
 
+    # Generate unique evaluation ID for tracking
+    evaluation_id = str(uuid.uuid4())
+
+    # C4: Log start of evaluation
+    if enable_c4_logging:
+        log_start_evaluation(evaluation_id, candidates, rubric, evaluator_model)
+
     candidate_ids = [c["id"] for c in candidates]
-    
+
     # Format candidates for prompt
     candidates_text = "\n".join([
         f"**Candidate {c.get('id', i+1)}:** {c['content']}"
         for i, c in enumerate(candidates)
     ])
-    
+
     # Format rubric for prompt
     rubric_text = "\n".join([f"- {criterion}: {weight}" for criterion, weight in rubric.items()])
 
@@ -138,6 +154,11 @@ def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float],
         result = evaluate_primitive(candidates_dict, rubric, evaluator_model)
         scores = result["scores"]
 
+    # C4: Log end of evaluation
+    c4_log_result = None
+    if enable_c4_logging:
+        c4_log_result = log_end_evaluation(evaluation_id, scores, log_skill)
+
     # Convert scores to serializable format
     scores_data = [
         {
@@ -155,5 +176,8 @@ def evaluate(candidates: List[Dict[str, Any]], rubric: Dict[str, float],
         "scores": scores_data,
         "calibration": 1.0,
         "prompt_used": EVALUATE_PROMPT.format(rubric=rubric_text, candidates=candidates_text),
-        "c1_enforced": True
+        "c1_enforced": True,
+        "c4_logged": enable_c4_logging,
+        "evaluation_id": evaluation_id,
+        "c4_log_result": c4_log_result,
     }

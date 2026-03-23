@@ -8,6 +8,11 @@ from pathlib import Path
 import os
 
 from compositional_co_scientist.storage.memory_db import MemoryDatabase
+from compositional_co_scientist.core.constraints.c5_memory_decay import (
+    run_decay_cleanup,
+    check_memory_health,
+    get_memory_stats,
+)
 
 
 _memory_db: Optional[MemoryDatabase] = None
@@ -63,3 +68,47 @@ def memory(operation: str, key: str, value: Any = None, ttl: int = None) -> Dict
 
     else:
         raise ValueError(f"Invalid operation: {operation}. Must be 'persist' or 'recall'")
+
+
+def memory_cleanup(
+    utility_threshold: float = 0.3,
+    decay_factor: float = 0.5
+) -> Dict[str, Any]:
+    """Run C5 memory decay cleanup.
+
+    Args:
+        utility_threshold: Utility score below which entries are decayed.
+        decay_factor: Factor to multiply utility by when decaying.
+
+    Returns:
+        Dictionary containing cleanup statistics.
+    """
+    db = _get_memory_db()
+    return run_decay_cleanup(db.db_path, utility_threshold, decay_factor)
+
+
+def memory_health_check(
+    max_entries: int = 1000,
+    max_avg_age_days: float = 30.0
+) -> Dict[str, Any]:
+    """Check C5 memory health metrics.
+
+    Args:
+        max_entries: Maximum acceptable number of entries.
+        max_avg_age_days: Maximum acceptable average age in days.
+
+    Returns:
+        Dictionary containing health metrics.
+    """
+    db = _get_memory_db()
+    return check_memory_health(db.db_path, max_entries, max_avg_age_days)
+
+
+def memory_statistics() -> Dict[str, Any]:
+    """Get memory database statistics.
+
+    Returns:
+        Dictionary with memory statistics.
+    """
+    db = _get_memory_db()
+    return get_memory_stats(db.db_path)

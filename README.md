@@ -1,6 +1,6 @@
 # The Compositional Co-Scientist
 
-**Version:** 0.1.0 - Research Prototype
+**Version:** 0.2.0 - Research Prototype
 
 Evidence-anchored agentic scaffolding for scientific reasoning.
 
@@ -9,12 +9,12 @@ Evidence-anchored agentic scaffolding for scientific reasoning.
 **Implemented & Enforced:**
 - ✅ C1: EVALUATE ≠ GENERATE (different models)
 - ✅ C2: GENERATE → EVALUATE → SELECT (temporal order)
+- ✅ C3: Diversity quota at SELECT (with auto-regenerate)
+- ✅ C4: LOG all EVALUATE operations (audit interceptor)
 - ✅ C6: ACT sandbox enforcement
 
 **Partial Implementation:**
-- 🟡 C3: Diversity quota at SELECT (quota enforced, auto-regenerate pending)
-- 🟡 C4: LOG all EVALUATE operations (logging works, auto-enforcement pending)
-- 🟡 C5: MEMORY decay policy (TTL exists, cleanup cron pending)
+- 🟡 C5: MEMORY decay policy (cleanup function exists, auto-cron pending)
 
 ## Installation
 
@@ -65,9 +65,9 @@ survivors = select(scored, diversity_quota=0.4)
 |------------|-------------|--------|
 | C1 | EVALUATE ≠ GENERATE (different models) | ✅ Enforced |
 | C2 | GENERATE → EVALUATE → SELECT (temporal order) | ✅ Enforced |
-| C3 | DIVERSITY quota at SELECT | 🟡 Partial |
-| C4 | LOG all EVALUATE operations | 🟡 Partial |
-| C5 | MEMORY decay policy | 🟡 Partial |
+| C3 | DIVERSITY quota at SELECT | ✅ Enforced + auto-regenerate |
+| C4 | LOG all EVALUATE operations | ✅ Enforced (audit interceptor) |
+| C5 | MEMORY decay policy | 🟡 Cleanup function exists |
 | C6 | ACT sandbox enforcement | ✅ Enforced |
 
 ## Testing
