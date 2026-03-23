@@ -1,0 +1,44 @@
+Abduction Scaffolding
+
+Using **“abduction scaffolding”** as shorthand for methods that help a model generate, compare, and validate explanatory hypotheses, the data points to a pretty clean pattern:
+
+**The strongest gains come from constraining the hypothesis search space with structure or external feedback.** Plain “think aloud” or rationale-first prompting is much less reliable, and in some abductive settings it actively hurts. ([ACL Anthology][1])
+
+Here’s the hard-data pass.
+
+**1) Retrieval / reuse / refinement helps.**
+In **Case-Based Abductive NLI**, a retrieve–reuse–refine scaffold beat a non-case-based PathNet baseline by **up to ~13 points overall** and **~7 points on challenge questions**. Their ablation also matters: on WorldTree, full **Retrieve-Reuse-Refine** reached **55.17** overall, versus **49.00** for Retrieve-Reuse and **43.46** for Retrieve-Refine, which is pretty direct evidence that the scaffold is doing more than cosmetic prompting. ([ACL Anthology][1])
+
+**2) Narrative decomposition + self-consistency can produce very large benchmark gains — but benchmark interpretation is tricky.**
+The original **ART / αNLI** paper reported **68.9%** best-model accuracy versus **91.4% human**. Later, a scaffolded T5 approach using self-consistent narrative prompting (**α-PACE**) reported **92.54% test accuracy**, compared with **87.68%** for its fine-tuned T5 baseline. So on that benchmark, scaffolding clearly helped a lot. But because that later score even edges past the original human benchmark, I would treat it as evidence that the benchmark is at least partly saturable, not that abductive reasoning is “solved.” ([OpenReview][2])
+
+**3) Human-seeded explanations refined by an LLM look better than either humans or LLMs alone.**
+In **UNcommonsense Reasoning**, the best-performing setup was effectively **human draft + LLM refinement**. Relative to plain LLM explanations, the hybrid reduced **lose rates** from **32.4% to 20.0%** on un-SocialIQA and from **42.6% to 23.0%** on un-RocStories. On the least likely outcomes, the hybrid’s **non-lose rate** against LLM-only explanations rose to **90.90%** on un-SocialIQA and **75.85%** on un-RocStories. That is one of the cleaner demonstrations that abduction benefits from a scaffold that combines a plausible seed with expansion/bridging detail. 
+
+**4) External world-model feedback is one of the strongest scaffold families.**
+In abductive reasoning over knowledge graphs, **RLF-KG** improved hypothesis quality consistently. For encoder-decoder models, Jaccard rose from **0.565 → 0.666** on FB15k-237, **0.708 → 0.753** on WN18RR, and **0.627 → 0.731** on DBpedia50. It also beat brute-force search while being dramatically faster: on FB15k-237, **Generation + RLF-KG** got **0.666 Jaccard** in **264 minutes**, versus **0.635** for brute-force search in **16,345 minutes**. That is very strong support for a scaffold where abductive generation is paired with an external validator/reward. 
+
+**5) Plain rationale generation is not a safe default for abductive tasks.**
+A 2025 claim-verification study that explicitly separates **deductive** from **abductive** cases found abductive examples were much harder, and that rationale generation often made them worse. On **VitaminC**, average error was **10.31%** for deductive versus **32%** for abductive cases. On **CLIMATE-FEVER**, it was **15.58%** versus **48.58%**. The paper also reports that moving into rationale-generation settings caused an average **14.76% performance drop on abductive cases**. That is a big warning sign against “just ask for explanations first” as a general abductive scaffold. 
+
+**6) Deep abduction is still weak even when shallow benchmarks look strong.**
+On **True Detective**, a long-form abductive benchmark built from mystery narratives, average humans solved **47%**, best human solvers got **over 80%**, GPT-3 was at **28%**, and GPT-4 only reached **38%**. So the field has real scaffold wins on constrained benchmarks, but long-horizon explanatory reasoning is still nowhere near robust. 
+
+**7) Evaluation itself is a major bottleneck.**
+An emerging 2025/2026 evaluation line argues that single-gold-answer scoring badly mismeasures abduction. **GEAR** reports that even **70B-class models produce only ~20% consistent hypotheses**, and that **around 80% of equally plausible hypotheses are labeled incorrect** by conventional gold-answer evaluations. That work is still **under review**, so I’d treat it as a strong signal rather than settled fact, but it matches the broader pattern: abductive quality is poorly captured by single-answer MCQ metrics. 
+
+My synthesis from the data:
+
+* **Best-supported scaffold pattern:** generate multiple hypotheses, ground them against an external structure or verifier, compare them explicitly, and preserve more than one plausible explanation. ([ACL Anthology][1])
+* **Weakest pattern:** free-form CoT or rationale-only prompting without an external check. 
+* **Most misleading signal:** high accuracy on narrow MCQ-style abductive benchmarks without testing open-ended hypothesis generation or consistency. ([ACL Anthology][3])
+
+So the short verdict is:
+
+**Abduction scaffolding is real, but the evidence supports a very specific kind of scaffold** — retrieval, structured decomposition, external validation, and hypothesis comparison. The data does **not** support the weaker idea that longer explanations or generic CoT reliably improve abductive reasoning. ([ACL Anthology][1])
+
+I can turn this into a tighter design memo next: **what to keep, what to avoid, and what an evidence-backed abductive scaffold should look like.**
+
+[1]: https://aclanthology.org/2022.coling-1.134.pdf "Case-Based Abductive Natural Language Inference"
+[2]: https://openreview.net/forum?id=Byg1v1HKDB "Abductive Commonsense Reasoning | OpenReview"
+[3]: https://aclanthology.org/2023.ijcnlp-main.67.pdf "Self-Consistent Narrative Prompts on Abductive Natural Language Inference"

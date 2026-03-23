@@ -1,0 +1,1502 @@
+# Agentic Scaffolding → /Skills Plugin Mapping
+
+## Executive Summary
+
+This mapping translates the 19 ontological families, 18+ primitives, and 9 dependency families from the theoretical dependency graph into a **concrete, implementable plugin architecture** for cross-platform distribution (Codex, Claude, Gemini CLI, OpenCode, marketplace skills).
+
+**Core finding:** Only **8 of 19 ontological families** map cleanly to Class A (Direct Plugin) implementation. **6 families** require Class B (Plugin + Optional External Service). **5 families** are Class C (Unrealistic for plugin without privileged infrastructure).
+
+**Irreducible plugin primitive basis:** `generate`, `evaluate`, `persist`, `retrieve`, `route`, `halt`, `log` — these 7 operations form the minimum viable plugin surface.
+
+---
+
+## 1. Plugin Architecture Overview
+
+### 1.1 Layer Mapping
+
+| Theoretical Layer | Plugin Implementation | Implementation Class |
+|-------------------|----------------------|---------------------|
+| Ontological Families | Module clusters (skill groups) | A/B/C mixed |
+| Methodological Families | Workflow templates (prompt chains) | A |
+| Dependency Families | Configuration constraints + validation | A |
+| Primitive Families | Individual skill functions | A |
+| Developmental Stages | Workflow phases with gates | A |
+| Best Practices | Default configurations + guardrails | A |
+| Anti-Patterns | Lint rules + failure detectors | A/B |
+
+### 1.2 Plugin Surface Contract
+
+```
+/skills/research/
+├── core/                    # Class A - portable substrate
+│   ├── generate.skill       # Candidate generation
+│   ├── evaluate.skill       # Quality assessment
+│   ├── retrieve.skill       # External knowledge fetch
+│   ├── persist.skill        # Memory write/read
+│   ├── route.skill          # Task routing & stage gating
+│   ├── halt.skill           # Stopping criteria enforcement
+│   └── log.skill            # Failure & provenance logging
+│
+├── advanced/                # Class B - optional external services
+│   ├── graph.skill          # Knowledge graph connector
+│   ├── verify.skill         # Cross-model verification
+│   ├── debate.skill         # Multi-perspective simulation
+│   └── consequence.skill    # Downstream impact tracing
+│
+├── stages/                  # Class A - workflow orchestration
+│   ├── 0-frame.skill        # Problem sensing
+│   ├── 1-explore.skill      # Divergent generation
+│   ├── 2-incubate.skill     # Protected development
+│   ├── 3-evaluate.skill     # Critical filtering
+│   ├── 4-synthesize.skill   # Integration
+│   ├── 5-formalize.skill    # Crystallization
+│   ├── 6-boundary.skill     # Consequence & risk
+│   └── 7-handoff.skill      # Output & provenance
+│
+└── config/                  # Class A - constraints & guardrails
+    ├── dependencies.yaml    # Required objects per stage
+    ├── gates.yaml           # Stage transition criteria
+    ├── anti-patterns.yaml   # Detection rules
+    └── safety.yaml          # Tool boundaries & escalation
+```
+
+---
+
+## 2. Ontological Family → Plugin Module Mapping
+
+### 2.1 Class A: Direct Plugin Implementation (8 families)
+
+| Ontological Family | Plugin Module(s) | Primitives Used | Stage Fit | Anti-Pattern Mitigation |
+|-------------------|------------------|-----------------|-----------|------------------------|
+| **Decomposition** | `core/route.skill`, `stages/0-frame.skill` | `decompose`, `plan`, `route` | S0-S2 | Prevents decomposition theater via subtask verification requirement |
+| **Deliberative/Reflective** | `core/evaluate.skill`, `stages/2-incubate.skill` | `reflect`, `critique`, `revise` | S2-S3 | Requires external feedback flag; blocks self-only loops |
+| **Retrieval/Grounding** | `core/retrieve.skill` | `retrieve`, `embed/index`, `recall` | S0-S7 | Implements retrieval dominance detection via novelty scoring |
+| **Memory/Lineage** | `core/persist.skill`, `core/log.skill` | `persist`, `recall`, `forget/decay`, `log-failure` | All | Enforces memory hygiene via decay policies & partitioning |
+| **Tool/Action** | `core/route.skill` (tool dispatch) | `call-tool`, `sandbox`, `checkpoint` | S1-S6 | Bounded tool use via permission manifests & sandbox specs |
+| **Evaluation/Verifier** | `core/evaluate.skill` | `evaluate/score`, `verify`, `calibrate` | S3-S5 | Evaluator separation enforced via model-family metadata |
+| **Human-Judgment** | `core/route.skill` (escalation), `stages/7-handoff.skill` | `escalate`, `halt/stop` | S0, S6-S7 | Prevents rubber-stamping via ambiguity thresholds |
+| **Reliability/Safety** | `core/halt.skill`, `core/log.skill`, `config/safety.yaml` | `halt/stop`, `log-failure`, `calibrate`, `checkpoint` | All | Compound reliability accounting; invisible failure detection |
+
+### 2.2 Class B: Plugin + Optional External Service (6 families)
+
+| Ontological Family | Plugin Module(s) | External Service Required | Fallback if Unavailable |
+|-------------------|------------------|--------------------------|------------------------|
+| **Search** | `stages/1-explore.skill` | None (local tree search) | Degrades to single-path generation with diversity quotas |
+| **Developmental/Gestational** | `stages/2-incubate.skill` | None (local maturity tracking) | Maturity scores become heuristic only |
+| **Selection/Competitive** | `stages/3-evaluate.skill` | None (local ranking) | Tournament becomes simple threshold filtering |
+| **Graph/Structural** | `advanced/graph.skill` | Vector store or KG endpoint | Degrades to flat claim-evidence lists |
+| **Dialectical/Tension-Preserving** | `advanced/debate.skill` | Second model instance (can be same provider, different model) | Degrades to single-model perspective simulation |
+| **Boundary/Consequence** | `advanced/consequence.skill` | Simulation API or benchmark oracle | Degrades to internal consequence tracing with confidence downgrade |
+
+### 2.3 Class C: Unrealistic for Plugin (5 families)
+
+| Ontological Family | Why Class C | Plugin-Compatible Approximation |
+|-------------------|-------------|-------------------------------|
+| **Coordination/Orchestration** | Requires privileged scheduler, async agent management, persistent daemon | Single-agent workflow with explicit stage gates; no background orchestration |
+| **Formalization/Crystallization** | Full formal proof checking requires external theorem provers, type checkers | Informal formalization templates; marks claims as "unverified formal" |
+| **Multi-Perspectival/Pluralist** | Genuine architectural diversity requires multiple model providers | Simulated perspective diversity via role prompts; flagged as "performative" |
+| **Integrative/Cross-Framework** | Meta-cognitive routing requires strategy library & performance tracking | Fixed strategy selection based on task type; no adaptive meta-learning |
+| **Novelty-Preservation** | Quality-diversity algorithms require population archives & novelty metrics | Simplified diversity quotas + anti-canon prompts; no true novelty scoring |
+
+---
+
+## 3. Primitive → Plugin Function Mapping
+
+### 3.1 Irreducible Core (7 primitives)
+
+| Primitive | Plugin Function | Input Schema | Output Schema | Failure Mode |
+|-----------|----------------|--------------|---------------|--------------|
+| `generate` | `core/generate.skill` | `{goal: str, constraints: [], temperature: float}` | `{candidates: [{text, metadata}], diversity_score: float}` | Mode collapse under low temperature |
+| `evaluate` | `core/evaluate.skill` | `{candidate: obj, rubric: obj, evaluator_id: str}` | `{score: float, critique: str, confidence: float}` | Evaluator collapse into style preference |
+| `persist` | `core/persist.skill` | `{artifact: obj, artifact_type: str, ttl: optional}` | `{artifact_id: str, storage_location: str}` | Memory bloat without decay policy |
+| `retrieve` | `core/retrieve.skill` | `{query: str, sources: [], max_results: int}` | `{results: [{content, source, relevance}], query_log: obj}` | Retrieval dominance over original thought |
+| `route` | `core/route.skill` | `{task: obj, stage: str, available_handlers: []}` | `{handler: str, routing_reason: str, escalation_flag: bool}` | Overcentralized orchestration bottleneck |
+| `halt` | `core/halt.skill` | `{state: obj, stopping_criteria: [], resource_budget: obj}` | `{halt_flag: bool, reason: str, checkpoint_saved: bool}` | Missing stopping conditions (runaway agent) |
+| `log` | `core/log.skill` | `{event_type: str, event_data: obj, severity: str}` | `{log_id: str, audit_trail_updated: bool}` | Invisible failure accumulation |
+
+### 3.2 Composable Extensions (11 primitives)
+
+| Primitive | Plugin Function | Dependencies | Class |
+|-----------|----------------|--------------|-------|
+| `decompose` | `stages/0-frame.skill` | `generate`, `route` | A |
+| `plan` | `stages/0-frame.skill` | `decompose`, `persist` | A |
+| `rank` | `stages/3-evaluate.skill` | `evaluate`, `select` | A |
+| `select` | `stages/3-evaluate.skill` | `rank`, `halt` | A |
+| `reflect` | `stages/2-incubate.skill` | `evaluate`, `persist` | A |
+| `critique` | `stages/2-incubate.skill`, `advanced/debate.skill` | `evaluate`, `retrieve` | A/B |
+| `debate` | `advanced/debate.skill` | `critique`, `route` (multi-model) | B |
+| `verify` | `advanced/verify.skill` | `evaluate`, `retrieve` (external source) | B |
+| `formalize` | `stages/5-formalize.skill` | `generate`, `verify` | A (informal), C (formal proof) |
+| `diversify` | `stages/1-explore.skill` | `generate`, `evaluate` (novelty) | A |
+| `trace-consequence` | `advanced/consequence.skill` | `retrieve`, `evaluate` | B |
+| `escalate` | `core/route.skill` | `halt`, `log` | A |
+| `checkpoint` | `core/persist.skill` | `persist`, `log` | A |
+| `aggregate` | `stages/4-synthesize.skill` | `generate`, `evaluate` | A |
+| `sandbox` | `config/safety.yaml` (policy) | `halt`, `log` | A (policy), B (enforcement) |
+| `forget/decay` | `core/persist.skill` | `persist`, `log` | A |
+| `calibrate` | `core/evaluate.skill` | `evaluate`, `log` (historical accuracy) | A |
+| `call-tool` | `core/route.skill` (tool dispatch) | `sandbox`, `log` | A |
+| `recall` | `core/retrieve.skill` (from memory) | `persist` | A |
+| `embed/index` | `core/retrieve.skill` | `persist` | A (local), B (vector service) |
+
+---
+
+## 4. Developmental Stage → Plugin Workflow Mapping
+
+### 4.1 Stage-Gated Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 0: FRAME (core/route.skill + stages/0-frame.skill)       │
+│  Primitives: decompose, plan, retrieve, escalate                │
+│  Gate Criteria: Goal well-formed? Ambiguity < threshold?        │
+│  Anti-Pattern Check: Premature decomposition, premature formal  │
+│  Exit: Route to Stage 1 OR escalate to human                    │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 1: EXPLORE (stages/1-explore.skill)                      │
+│  Primitives: generate, diversify, branch, retrieve              │
+│  Gate Criteria: Diversity score > minimum? Novel candidates?    │
+│  Anti-Pattern Check: Premature ranking, retrieval anchoring     │
+│  Exit: Route to Stage 2 OR loop back if diversity insufficient  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 2: INCUBATE (stages/2-incubate.skill)                    │
+│  Primitives: reflect, critique, persist, recall, revise         │
+│  Gate Criteria: Maturity score > threshold? External feedback?  │
+│  Anti-Pattern Check: Degeneration of thought, stage collapse    │
+│  Exit: Route to Stage 3 OR loop for refinement                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 3: EVALUATE (stages/3-evaluate.skill)                    │
+│  Primitives: evaluate, rank, select, debate, verify, calibrate  │
+│  Gate Criteria: Evaluator diversity? Cross-family verification? │
+│  Anti-Pattern Check: Evaluator collapse, benchmark overfitting  │
+│  Exit: Route to Stage 4 OR reject & loop to Stage 1             │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 4: SYNTHESIZE (stages/4-synthesize.skill)                │
+│  Primitives: aggregate, synthesize, link, route, merge          │
+│  Gate Criteria: Strongest elements preserved? Contradictions mapped? │
+│  Anti-Pattern Check: Premature synthesis, averaging to mediocrity │
+│  Exit: Route to Stage 5 OR loop for better integration          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 5: FORMALIZE (stages/5-formalize.skill)                  │
+│  Primitives: formalize, verify, type-check, crystallize         │
+│  Gate Criteria: Formalization readiness check passed?           │
+│  Anti-Pattern Check: Premature formalization, hallucinated proof │
+│  Exit: Route to Stage 6 OR flag as "informal only"              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 6: BOUNDARY (advanced/consequence.skill + config/safety) │
+│  Primitives: trace-consequence, sandbox, assess-risk, checkpoint │
+│  Gate Criteria: Irreversible actions? Human approval required?  │
+│  Anti-Pattern Check: Paralysis by analysis, consequence-blind   │
+│  Exit: Route to Stage 7 OR escalate for human approval          │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  STAGE 7: HANDOFF (stages/7-handoff.skill + core/log.skill)     │
+│  Primitives: escalate, log, persist, trace-provenance, present  │
+│  Gate Criteria: All claims have provenance? Confidence marked?  │
+│  Anti-Pattern Check: Overclaiming, invisible failure accumulation │
+│  Exit: Complete OR escalate for final human review              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 4.2 Stage Transition Gate Schema
+
+```yaml
+# config/gates.yaml
+stage_transitions:
+  0_to_1:
+    required_checks:
+      - goal_well_formed: boolean
+      - ambiguity_score_below: 0.3
+      - human_approval_if_high_stakes: boolean
+    fallback: escalate_to_human
+    
+  1_to_2:
+    required_checks:
+      - diversity_score_above: 0.6
+      - minimum_candidates: 3
+      - novelty_quota_met: boolean
+    fallback: loop_to_stage_1
+    
+  2_to_3:
+    required_checks:
+      - maturity_score_above: 0.7
+      - external_feedback_received: boolean
+      - no_degeneration_detected: boolean
+    fallback: loop_to_stage_2
+    
+  3_to_4:
+    required_checks:
+      - evaluator_diversity_confirmed: boolean
+      - cross_family_verification: boolean
+      - no_evaluator_collapse: boolean
+    fallback: reject_to_stage_1
+    
+  4_to_5:
+    required_checks:
+      - strongest_elements_preserved: boolean
+      - contradictions_mapped: boolean
+      - no_premature_synthesis: boolean
+    fallback: loop_to_stage_4
+    
+  5_to_6:
+    required_checks:
+      - formalization_readiness: boolean
+      - verification_status: verified | informal_only
+    fallback: flag_as_informal
+    
+  6_to_7:
+    required_checks:
+      - irreversible_actions_flagged: boolean
+      - human_approval_obtained: boolean
+      - risk_assessment_complete: boolean
+    fallback: escalate_for_approval
+    
+  7_complete:
+    required_checks:
+      - all_claims_have_provenance: boolean
+      - confidence_intervals_present: boolean
+      - failure_log_complete: boolean
+    fallback: block_completion
+```
+
+---
+
+## 5. Dependency Family → Plugin Configuration Mapping
+
+### 5.1 Representational Dependencies → Artifact Schemas
+
+```yaml
+# config/dependencies.yaml
+representational_dependencies:
+  stage_0:
+    required_objects:
+      - goal_specification: {type: object, schema: goal.schema.yaml}
+      - task_graph: {type: object, schema: dag.schema.yaml}
+    validation: required_before_stage_1
+    
+  stage_1:
+    required_objects:
+      - candidate_set: {type: array, min_items: 3}
+      - diversity_metrics: {type: object}
+    validation: diversity_threshold_check
+    
+  stage_2:
+    required_objects:
+      - critique_history: {type: array}
+      - version_history: {type: array}
+      - maturity_scores: {type: object}
+    validation: external_feedback_required
+    
+  stage_3:
+    required_objects:
+      - evaluation_scores: {type: array}
+      - evaluator_metadata: {type: object, requires: model_family_diversity}
+      - verification_verdicts: {type: array}
+    validation: cross_family_verification_required
+    
+  stage_4:
+    required_objects:
+      - synthesis_artifact: {type: object}
+      - contradiction_map: {type: object}
+    validation: strongest_elements_preserved_check
+    
+  stage_5:
+    required_objects:
+      - formal_claims: {type: array}
+      - proof_objects: {type: array, optional: true}
+      - verification_status: {type: enum, values: [verified, informal_only]}
+    validation: formalization_readiness_check
+    
+  stage_6:
+    required_objects:
+      - consequence_vectors: {type: array}
+      - risk_register: {type: object}
+      - permission_manifest: {type: object}
+    validation: irreversible_action_flag
+    
+  stage_7:
+    required_objects:
+      - provenance_record: {type: object, schema: prov.schema.yaml}
+      - confidence_annotations: {type: array}
+      - failure_log: {type: array}
+    validation: all_claims_traceable
+```
+
+### 5.2 Control-Flow Dependencies → Workflow Enforcement
+
+```yaml
+# config/dependencies.yaml (continued)
+control_flow_dependencies:
+  decomposition_before_execution:
+    enforced_by: stages/0-frame.skill
+    violation_action: block_execution
+    
+  divergence_before_convergence:
+    enforced_by: stages/1-explore.skill → stages/3-evaluate.skill
+    violation_action: loop_to_stage_1
+    
+  critique_before_commitment:
+    enforced_by: stages/2-incubate.skill → stages/3-evaluate.skill
+    violation_action: require_external_feedback
+    
+  retrieval_before_synthesis:
+    enforced_by: core/retrieve.skill → stages/4-synthesize.skill
+    violation_action: auto_retrieve
+    
+  incubation_before_selection:
+    enforced_by: stages/2-incubate.skill → stages/3-evaluate.skill
+    violation_action: maturity_check_fail
+    
+  evaluation_before_escalation:
+    enforced_by: core/evaluate.skill → core/route.skill
+    violation_action: require_evaluation
+    
+  consequence_tracing_before_crystallization:
+    enforced_by: advanced/consequence.skill → stages/5-formalize.skill
+    violation_action: flag_as_unassessed
+```
+
+### 5.3 Evaluation Dependencies → Rubric Configuration
+
+```yaml
+# config/dependencies.yaml (continued)
+evaluation_dependencies:
+  stage_1_criteria:
+    - novelty: {weight: 0.4, min_score: 0.5}
+    - diversity: {weight: 0.3, min_score: 0.6}
+    - relevance: {weight: 0.3, min_score: 0.4}
+    
+  stage_2_criteria:
+    - coherence: {weight: 0.3, min_score: 0.6}
+    - explanatory_power: {weight: 0.3, min_score: 0.5}
+    - improvement_trajectory: {weight: 0.4, min_score: 0.5}
+    
+  stage_3_criteria:
+    - factual_grounding: {weight: 0.4, min_score: 0.7}
+    - rigor: {weight: 0.3, min_score: 0.6}
+    - resilience: {weight: 0.3, min_score: 0.5}
+    - evaluator_independence: {weight: 0.0, required: true}  # Gate, not score
+    
+  stage_4_criteria:
+    - completeness: {weight: 0.3, min_score: 0.6}
+    - coherence: {weight: 0.4, min_score: 0.7}
+    - diversity_preserved: {weight: 0.3, min_score: 0.5}
+    
+  stage_5_criteria:
+    - formal_correctness: {weight: 0.5, min_score: 0.8, optional: true}
+    - precision: {weight: 0.3, min_score: 0.7}
+    - actionability: {weight: 0.2, min_score: 0.6}
+    
+  stage_6_criteria:
+    - risk_level: {weight: 0.0, threshold: 0.3, action: escalate_if_exceeded}
+    - consequence_completeness: {weight: 0.5, min_score: 0.7}
+    - safety_compliance: {weight: 0.5, required: true}
+    
+  stage_7_criteria:
+    - provenance_completeness: {weight: 0.4, required: true}
+    - confidence_calibration: {weight: 0.3, min_score: 0.6}
+    - failure_transparency: {weight: 0.3, required: true}
+```
+
+### 5.4 Memory Dependencies → Persistence Policy
+
+```yaml
+# config/dependencies.yaml (continued)
+memory_dependencies:
+  partitioning:
+    provenance: {ttl: permanent, decay: none}
+    constraints: {ttl: permanent, decay: none}
+    failed_branches: {ttl: 30_days, decay: linear}
+    successful_strategies: {ttl: 90_days, decay: utility_based}
+    critique_histories: {ttl: 60_days, decay: utility_based}
+    unresolved_tensions: {ttl: permanent, decay: none}
+    
+  hygiene_policies:
+    - periodic_consolidation: {interval: 7_days}
+    - utility_scoring: {enabled: true, decay_rate: 0.1_per_day}
+    - path_dependence_detection: {enabled: true, threshold: 0.7}
+    - memory_bloat_guard: {max_artifacts: 1000, action: archive_oldest}
+    
+  access_logging:
+    - all_reads_logged: true
+    - influence_tracking: true
+    - audit_queryable: true
+```
+
+---
+
+## 6. Anti-Pattern → Plugin Detection & Mitigation Mapping
+
+### 6.1 Detection Rules (config/anti-patterns.yaml)
+
+```yaml
+anti_pattern_detection:
+  premature_convergence:
+    detection:
+      - candidate_count_below: 3 at stage_3
+      - diversity_score_below: 0.4 at stage_3
+      - all_candidates_from_same_model_family: true
+    mitigation: loop_to_stage_1_with_diversity_quota
+    
+  retrieval_dominance:
+    detection:
+      - citation_density_above: 0.7
+      - novel_claim_ratio_below: 0.2
+      - paraphrase_similarity_above: 0.8
+    mitigation: force_generation_mode_with_anti_canon_prompt
+    
+  evaluator_collapse:
+    detection:
+      - generator_and_evaluator_same_model_family: true
+      - style_correlation_with_score_above: 0.6
+      - verbosity_correlation_with_score_above: 0.5
+    mitigation: require_cross_family_verification
+    
+  stage_collapse:
+    detection:
+      - stage_duration_below_minimum: true
+      - stage_gate_criteria_skipped: true
+      - wrong_primitives_for_stage: true
+    mitigation: block_transition_enforce_gate
+    
+  hidden_memory_path_dependence:
+    detection:
+      - early_memory_influence_score_above: 0.7
+      - no_divergence_from_initial_trajectory: true
+      - memory_partition_violations: count > 0
+    mitigation: force_memory_consolidation_and_decay
+    
+  premature_formalization:
+    detection:
+      - formalization_attempted_before_stage_5: true
+      - maturity_score_below_0.7_at_formalization: true
+    mitigation: block_formalization_flag_as_premature
+    
+  invisible_failure_accumulation:
+    detection:
+      - failure_log_entries_below_expected: true
+      - no_drift_indicators_detected: true
+      - end_to_end_confidence_above_stepwise_product: true
+    mitigation: require_compound_reliability_calculation
+    
+  cargo_cult_multi_agentism:
+    detection:
+      - multiple_agents_same_model: true
+      - coordination_overhead_above_benefit: true
+      - no_genuine_diversity_metrics: true
+    mitigation: collapse_to_single_agent_with_role_prompts
+    
+  verification_theater:
+    detection:
+      - verification_claimed_without_external_source: true
+      - proof_objects_missing_for_formal_claims: true
+      - hallucinated_verification_signals: detected
+    mitigation: downgrade_confidence_flag_as_unverified
+    
+  untracked_uncertainty:
+    detection:
+      - confidence_annotations_missing: count > 0
+      - verbalized_confidence_without_calibration: true
+      - uncertainty_not_propagated_through_pipeline: true
+    mitigation: require_calibration_before_handoff
+```
+
+### 6.2 Severity & Response Matrix
+
+| Anti-Pattern | Severity | Auto-Mitigation | Requires Human Escalation |
+|--------------|----------|-----------------|--------------------------|
+| Premature convergence | High | Loop to Stage 1 | If persists after 2 loops |
+| Retrieval dominance | High | Force generation mode | No |
+| Evaluator collapse | Critical | Require cross-family verification | If no alternative model available |
+| Stage collapse | High | Block transition | If gate criteria cannot be met |
+| Hidden memory path dependence | Medium | Force consolidation | If influence score > 0.9 |
+| Premature formalization | High | Block formalization | No |
+| Invisible failure accumulation | Critical | Require reliability calculation | If end-to-end < 50% |
+| Cargo-cult multi-agentism | Medium | Collapse to single agent | No |
+| Verification theater | Critical | Downgrade confidence | If formal claims unverified |
+| Untracked uncertainty | High | Require calibration | If calibration data unavailable |
+
+---
+
+## 7. Minimal Viable Plugin (MVP) Specification
+
+### 7.1 MVP Scope (Class A Only)
+
+```
+/skills/research/mvp/
+├── core/
+│   ├── generate.skill       # Candidate generation
+│   ├── evaluate.skill       # Quality assessment (single model)
+│   ├── retrieve.skill       # External knowledge fetch
+│   ├── persist.skill        # File-based memory
+│   ├── route.skill          # Stage routing + escalation
+│   ├── halt.skill           # Stopping criteria
+│   └── log.skill            # Failure & provenance logging
+│
+├── stages/
+│   ├── 0-frame.skill
+│   ├── 1-explore.skill
+│   ├── 2-incubate.skill
+│   ├── 3-evaluate.skill
+│   ├── 4-synthesize.skill
+│   └── 7-handoff.skill      # Skip 5-formalize, 6-boundary
+│
+└── config/
+    ├── dependencies.yaml    # Simplified
+    ├── gates.yaml           # Basic gates only
+    └── anti-patterns.yaml   # Critical patterns only
+```
+
+### 7.2 MVP Capabilities
+
+| Capability | Implementation | Limitation |
+|------------|---------------|------------|
+| Candidate generation | `core/generate.skill` with diversity prompts | No true novelty scoring |
+| Basic evaluation | `core/evaluate.skill` (single model) | No cross-family verification |
+| Retrieval grounding | `core/retrieve.skill` with local index | No vector service integration |
+| Memory persistence | `core/persist.skill` (file-based) | No decay policies, manual cleanup |
+| Stage gating | `stages/*.skill` with basic gates | No maturity scoring |
+| Escalation | `core/route.skill` with human flag | No ambiguity thresholds |
+| Provenance logging | `core/log.skill` | Basic audit trail only |
+
+### 7.3 MVP Anti-Pattern Coverage
+
+| Anti-Pattern | MVP Detection | MVP Mitigation |
+|--------------|---------------|----------------|
+| Premature convergence | Candidate count check | Loop to Stage 1 |
+| Retrieval dominance | Citation density check | Force generation mode |
+| Evaluator collapse | Model family check | Warning only (cannot enforce cross-family) |
+| Stage collapse | Stage duration check | Block transition |
+| Invisible failure accumulation | Failure log check | Warning only |
+| Untracked uncertainty | Confidence annotation check | Require before handoff |
+
+---
+
+## 8. Enhanced Plugin (Plugin-Plus) Specification
+
+### 8.1 Plugin-Plus Additions (Class B)
+
+```
+/skills/research/plus/
+├── advanced/
+│   ├── graph.skill          # Knowledge graph connector
+│   ├── verify.skill         # Cross-model verification
+│   ├── debate.skill         # Multi-perspective (multi-model)
+│   └── consequence.skill    # Downstream impact tracing
+│
+├── stages/
+│   ├── 5-formalize.skill    # Full formalization support
+│   └── 6-boundary.skill     # Consequence & risk assessment
+│
+└── config/
+    ├── dependencies.yaml    # Full specification
+    ├── gates.yaml           # All gates with maturity scoring
+    ├── anti-patterns.yaml   # Full detection suite
+    └── safety.yaml          # Tool boundaries & escalation
+```
+
+### 8.2 Plugin-Plus External Service Requirements
+
+| Service | Purpose | Fallback if Unavailable |
+|---------|---------|------------------------|
+| Vector store (optional) | Similarity search for retrieval & memory | Degrade to keyword search |
+| Second model instance | Cross-family verification, debate | Warning: evaluator independence compromised |
+| Knowledge graph endpoint | Structured reasoning, relation tracing | Degrade to flat claim-evidence lists |
+| Simulation/benchmark API | Consequence testing, external validation | Degrade to internal tracing with confidence downgrade |
+
+### 8.3 Plugin-Plus Capability Gains
+
+| Capability | MVP | Plugin-Plus | Improvement |
+|------------|-----|-------------|-------------|
+| Evaluator independence | ✗ | ✓ (cross-model) | Critical reliability gain |
+| Novelty preservation | Basic diversity | Quality-diversity heuristics | Better candidate retention |
+| Consequence assessment | Internal only | External simulation possible | Higher-stakes task support |
+| Formalization | Informal only | Formal verification possible | Math/code domain support |
+| Memory hygiene | Manual | Automated decay & consolidation | Reduced path dependence |
+| Anti-pattern detection | 6 patterns | 10+ patterns | Better failure prevention |
+
+---
+
+## 9. Platform-Specific Packaging
+
+### 9.1 Codex (`.codex/skills/`)
+
+```
+.codex/
+├── skills/
+│   └── research/
+│       ├── SKILL.md           # Skill metadata
+│       ├── core/
+│       ├── advanced/
+│       ├── stages/
+│       └── config/
+├── bootstrap.md               # Platform-specific setup
+└── INSTALL.md                 # Dependencies & permissions
+```
+
+**Codex-specific considerations:**
+- Use `.codex/skills` directory structure
+- Leverage Codex tool registry for `call-tool` primitive
+- Use Codex session checkpointing for `persist` primitive
+- Permission model: explicit tool access in `INSTALL.md`
+
+### 9.2 Claude Code (`skills/`)
+
+```
+skills/
+└── research/
+    ├── skill.yaml             # Skill definition
+    ├── core/
+    ├── advanced/
+    ├── stages/
+    └── config/
+```
+
+**Claude-specific considerations:**
+- Use `skill.yaml` for skill metadata
+- Leverage Claude Code hooks for `checkpoint` primitive
+- Use Claude's context files for `retrieve` primitive
+- Permission model: hooks guide for tool boundaries
+
+### 9.3 Gemini CLI (`extensions/`)
+
+```
+extensions/
+└── research/
+    ├── GEMINI.md              # Extension metadata
+    ├── core/
+    ├── advanced/
+    ├── stages/
+    └── config/
+```
+
+**Gemini-specific considerations:**
+- Use `GEMINI.md` for extension metadata
+- Leverage MCP server support for `advanced/graph.skill`
+- Use Gemini checkpointing for `persist` primitive
+- Permission model: MCP server permissions
+
+### 9.4 OpenCode (`plugins/`)
+
+```
+plugins/
+└── research/
+    ├── plugin.yaml            # Plugin definition
+    ├── core/
+    ├── advanced/
+    ├── stages/
+    └── config/
+```
+
+**OpenCode-specific considerations:**
+- Use `plugin.yaml` for plugin metadata
+- Leverage OpenCode plugin API for tool registration
+- Use OpenCode skills discovery for modular loading
+- Permission model: plugin permissions in `plugin.yaml`
+
+### 9.5 Cross-Platform Abstraction Layer
+
+```
+/skills/research/
+├── platform/
+│   ├── codex/
+│   ├── claude/
+│   ├── gemini/
+│   └── opencode/
+│
+├── shared/                    # Platform-agnostic core
+│   ├── core/
+│   ├── stages/
+│   └── config/
+│
+└── adapters/                  # Thin platform wrappers
+    ├── persist_adapter.skill  # Maps to platform storage
+    ├── retrieve_adapter.skill # Maps to platform retrieval
+    └── tool_adapter.skill     # Maps to platform tool registry
+```
+
+**Key principle:** Shared logic in `/shared/`, platform-specific adapters in `/adapters/`, no platform logic in core skills.
+
+---
+
+## 10. Evaluation Strategy for Plugin
+
+### 10.1 Internal Evaluation (Plugin Self-Check)
+
+```yaml
+# config/eval.yaml
+internal_evaluation:
+  stage_gate_compliance:
+    metric: percentage_of_transitions_with_valid_gates
+    threshold: 1.0  # Must be 100%
+    
+  anti_pattern_detection_rate:
+    metric: detected_vs_injected_anti_patterns
+    threshold: 0.8
+    
+  compound_reliability_accounting:
+    metric: end_to_end_reliability_calculated
+    threshold: 1.0  # Must always calculate
+    
+  evaluator_independence:
+    metric: cross_family_verification_used
+    threshold: 1.0  # Required for Plugin-Plus, warning for MVP
+    
+  provenance_completeness:
+    metric: claims_with_traceable_provenance
+    threshold: 1.0  # Must be 100%
+```
+
+### 10.2 External Evaluation (Benchmark Tasks)
+
+| Benchmark | Purpose | Plugin Module Tested | Success Criteria |
+|-----------|---------|---------------------|------------------|
+| Custom stage-gate tasks | Stage transition correctness | `stages/*.skill` + `config/gates.yaml` | 100% gate compliance |
+| Anti-pattern injection tasks | Detection & mitigation | `config/anti-patterns.yaml` | 80%+ detection rate |
+| Cross-model verification tasks | Evaluator independence | `advanced/verify.skill` | Cross-family verification used |
+| Long-horizon tasks (5+ stages) | Compound reliability | All stages + `core/log.skill` | End-to-end reliability calculated & < 70% triggers escalation |
+| Novelty tasks | Diversity preservation | `stages/1-explore.skill` + `stages/2-incubate.skill` | Diversity score > 0.6, novelty quota met |
+| High-stakes tasks | Boundary & escalation | `advanced/consequence.skill` + `core/route.skill` | 100% escalation for irreversible actions |
+
+### 10.3 Falsifier Tests (From Plugin Hypothesis Document)
+
+| Falsifier | Test | Expected Failure Mode | Plugin Response |
+|-----------|------|----------------------|-----------------|
+| Portable skill-first prototype cannot preserve structured intermediate artifacts | Cross-platform artifact comparison | Artifact schema drift between platforms | Enforce shared artifact schema in `config/dependencies.yaml` |
+| Platform differences force meaningfully different prompt logic | Same task, different platforms | Prompt divergence > 20% | Thin adapter layer only; core prompts identical |
+| Simpler monolithic orchestration performs as well | MVP vs monolithic prompt | No significant quality difference | MVP wins on inspectability & debugging |
+| Consequence testing adds little value | With vs without `advanced/consequence.skill` | No quality difference on theory tasks | Consequence testing optional for low-stakes |
+| Adding memory increases path dependence | With vs without memory decay | Higher path dependence with memory | Enforce decay policies; partition memory |
+
+---
+
+## 11. Security & Permission Boundaries
+
+### 11.1 Tool Permission Manifest
+
+```yaml
+# config/safety.yaml
+tool_permissions:
+  read_only_tools:
+    - web_search
+    - file_read
+    - database_query
+    - vector_store_query
+    requires_escalation: false
+    
+  write_tools:
+    - file_write
+    - database_write
+    requires_escalation: false
+    requires_checkpoint: true
+    
+  execution_tools:
+    - code_execution
+    - api_call
+    - external_simulation
+    requires_escalation: true
+    requires_sandbox: true
+    requires_consequence_assessment: true
+    
+  irreversible_tools:
+    - financial_transaction
+    - physical_experiment
+    - data_deletion
+    requires_escalation: true
+    requires_human_approval: true
+    requires_consequence_assessment: true
+```
+
+### 11.2 Escalation Triggers
+
+```yaml
+# config/safety.yaml (continued)
+escalation_triggers:
+  ambiguity_threshold:
+    metric: goal_ambiguity_score
+    threshold: 0.5
+    action: escalate_to_human
+    
+  confidence_threshold:
+    metric: final_output_confidence
+    threshold: 0.6
+    action: flag_as_low_confidence
+    
+  risk_threshold:
+    metric: consequence_risk_score
+    threshold: 0.3
+    action: escalate_to_human
+    
+  evaluator_disagreement:
+    metric: evaluator_score_variance
+    threshold: 0.4
+    action: require_additional_evaluation
+    
+  stage_gate_failure:
+    metric: consecutive_gate_failures
+    threshold: 2
+    action: escalate_to_human
+    
+  compound_reliability:
+    metric: end_to_end_reliability
+    threshold: 0.5
+    action: escalate_to_human
+    
+  anti_pattern_persistence:
+    metric: same_anti_pattern_detected_count
+    threshold: 3
+    action: escalate_to_human
+```
+
+### 11.3 Audit Trail Requirements
+
+```yaml
+# config/safety.yaml (continued)
+audit_requirements:
+  logged_events:
+    - all_stage_transitions
+    - all_escalations
+    - all_tool_calls
+    - all_evaluation_scores
+    - all_anti_pattern_detections
+    - all_memory_writes
+    - all_gate_violations
+    
+  retention_policy:
+    provenance: permanent
+    failures: 90_days
+    evaluations: 60_days
+    tool_calls: 30_days
+    
+  accessibility:
+    user_queryable: true
+    machine_parseable: true
+    exportable: true
+```
+
+---
+
+## 12. Implementation Roadmap
+
+### 12.1 Phase 1: MVP (Weeks 1-4)
+
+| Week | Deliverable | Dependencies |
+|------|-------------|--------------|
+| 1 | Core primitives (`generate`, `evaluate`, `retrieve`, `persist`, `route`, `halt`, `log`) | None |
+| 2 | Stage skills (0-4, 7) + basic gates | Core primitives |
+| 3 | Config schemas + anti-pattern detection (6 patterns) | Stage skills |
+| 4 | Platform adapters (Codex, Claude) + MVP testing | All above |
+
+**MVP Success Criteria:**
+- All 7 core primitives functional
+- 6 stages operational with gate enforcement
+- 6 anti-patterns detected & mitigated
+- Cross-platform artifact preservation verified
+
+### 12.2 Phase 2: Plugin-Plus (Weeks 5-8)
+
+| Week | Deliverable | Dependencies |
+|------|-------------|--------------|
+| 5 | Advanced skills (`graph`, `verify`, `debate`, `consequence`) | MVP complete |
+| 6 | Stages 5-6 + maturity scoring | Advanced skills |
+| 7 | External service integrations (vector store, second model) | Advanced skills |
+| 8 | Full anti-pattern suite (10+ patterns) + Plugin-Plus testing | All above |
+
+**Plugin-Plus Success Criteria:**
+- Cross-family verification functional
+- Consequence assessment operational
+- Formalization support (informal + formal where possible)
+- 10+ anti-patterns detected & mitigated
+
+### 12.3 Phase 3: Optimization & Hardening (Weeks 9-12)
+
+| Week | Deliverable | Dependencies |
+|------|-------------|--------------|
+| 9 | Performance optimization (latency, token efficiency) | Plugin-Plus complete |
+| 10 | Falsifier testing + iteration | All above |
+| 11 | Additional platform adapters (Gemini, OpenCode) | MVP complete |
+| 12 | Documentation + marketplace packaging | All above |
+
+**Hardening Success Criteria:**
+- Falsifier tests passed (or hypothesis revised)
+- 4+ platforms supported
+- Marketplace-ready packaging
+- Compound reliability accounting accurate
+
+---
+
+## 13. Summary: What Transfers, What Doesn't
+
+### 13.1 Transfers Cleanly (Plugin-Compatible)
+
+| Theoretical Component | Plugin Implementation | Confidence |
+|----------------------|----------------------|------------|
+| 7 irreducible primitives | `core/*.skill` | High |
+| 8 ontological families | Class A modules | High |
+| Stage-gated workflow | `stages/*.skill` + `config/gates.yaml` | High |
+| Anti-pattern detection | `config/anti-patterns.yaml` | High |
+| Representational dependencies | `config/dependencies.yaml` | High |
+| Control-flow dependencies | Stage gate enforcement | High |
+| Memory partitioning | `core/persist.skill` with policies | High |
+| Escalation triggers | `config/safety.yaml` | High |
+
+### 13.2 Transfers with Degradation (Plugin-Limited)
+
+| Theoretical Component | Plugin Implementation | Degradation |
+|----------------------|----------------------|-------------|
+| Search ontology | Local tree search (no distributed) | No parallel exploration |
+| Developmental ontology | Local maturity tracking (no external validation) | Maturity scores heuristic only |
+| Graph ontology | External KG connector (optional) | Degrades to flat lists without service |
+| Dialectical ontology | Multi-model simulation (requires 2nd model) | Degrades to role prompts without |
+| Boundary ontology | Internal consequence tracing (no simulation) | Confidence downgrade without external |
+| Novelty preservation | Diversity quotas (no true novelty scoring) | No genuine novelty detection |
+
+### 13.3 Does Not Transfer (Plugin-Incompatible)
+
+| Theoretical Component | Why Not | Plugin Approximation |
+|----------------------|---------|---------------------|
+| Coordination/Orchestration | Requires privileged scheduler, async daemon | Single-agent workflow with explicit stages |
+| Full Formalization | Requires theorem provers, type checkers | Informal formalization templates only |
+| Genuine Pluralism | Requires multiple model providers | Simulated perspective diversity via prompts |
+| Integrative/Cross-Framework | Requires meta-learning, strategy library | Fixed strategy selection by task type |
+| True Novelty Scoring | Requires expert judgment, neighborhood analysis | Anti-canon prompts + diversity quotas |
+
+---
+
+## 14. Final Recommendation
+
+**Build the MVP first.** The 7 irreducible primitives + 6 core stages + basic anti-pattern detection capture ~70% of the theoretical value with ~30% of the implementation complexity.
+
+**Plugin-Plus is optional enhancement.** Cross-family verification, consequence assessment, and formalization support are high-value but require external services. Make them opt-in.
+
+**Do not attempt Class C families.** Coordination/orchestration, genuine pluralism, and true novelty scoring require privileged infrastructure. Acknowledge this limitation explicitly rather than cargo-cult approximations.
+
+**Prioritize evaluator independence.** This is the single highest-leverage design principle from the dependency graph. Even MVP should warn when cross-family verification is unavailable; Plugin-Plus should require it.
+
+**Enforce stage gates rigidly.** Stage collapse is one of the most damaging anti-patterns. The plugin should block transitions that skip required gates, not just warn.
+
+**Make anti-pattern detection visible.** Users should see when anti-patterns are detected and what mitigation was applied. This builds trust and enables debugging.
+
+**Test falsifiers explicitly.** The plugin hypothesis document identifies 8 falsifiers. Test each one during Phase 3. If falsifiers hold, revise the hypothesis rather than ignoring them.
+
+**Document limitations clearly.** Marketplace users should understand what the plugin can and cannot do. The demo-deployment gap is real: best agents solve 32-42% of realistic scientific tasks. Do not overclaim.
+
+Okay. Now we're talking about something concrete and buildable.
+
+Let me actually read your skill infrastructure first before I start designing anything, because I know your setup has sprawled and I don't want to design into a vacuum.
+
+---Okay. Now I have what I need. Let me give you the honest read.
+
+---
+
+## What the infrastructure actually supports
+
+The skill system is more capable than I initially assumed. Three things I didn't fully credit:
+
+**Progressive disclosure is real.** Metadata → SKILL.md body → references/ → scripts/ is a genuine three-tier loading hierarchy. This means you *can* encode stage-awareness — not as a runtime router, but as explicit conditional read instructions inside SKILL.md. "If the current work is in exploration phase, read `references/diverge.md`. If in evaluation phase, read `references/converge.md`." Brittle, but not nothing.
+
+**Scripts are executable.** Deterministic primitives — citation formatting, hypothesis scoring rubrics, claim-evidence separation checks — can live in scripts/ and run without loading into context. This sidesteps the context bloat problem for mechanical operations.
+
+**The MCP tool surface is genuinely massive.** You have Gmail, Google Calendar, HuggingFace, Linear, BigQuery, Craft. For a researcher/lab-partner pack this is significant — literature retrieval, experiment tracking, hypothesis logging, paper drafting pipeline — these aren't just vaguely possible, they're directly connectable.
+
+---
+
+## The honest mapping to research ontology families
+
+Here's which families translate cleanly into skills vs. which ones don't:
+
+**Clean mappings — build these:**
+
+| Ontological family | Skill shape | MCP leverage |
+|---|---|---|
+| Retrieval/Grounding | `literature-scout` — query strategy, source hierarchy, citation hygiene, anti-retrieval-dominance guards | HuggingFace paper search, web search |
+| Formalization/Crystallization | `hypothesis-formalizer` — informal→formal translation, claim/evidence separation, proof-readiness checks | Wolfram (already exists), extend it |
+| Evaluation/Verifier | `claim-auditor` — explicit verification rubric, evaluator separation enforcement, calibration marking | BigQuery for data claims, web for factual grounding |
+| Memory/Lineage | `research-lineage` — experiment versioning, hypothesis ancestry, failed-path logging, stage transition records | Craft for persistent notes, Linear for structured tracking |
+| Reliability/Safety | `epistemic-guardrails` — uncertainty propagation, confidence marking, stopping criteria, invisible failure detection | Cross-references claim-auditor |
+| Tool/Action | `lab-executor` — bounded tool invocation, observation logging, result interpretation separation | All MCPs, sandboxed |
+
+**Partial mappings — build with explicit limitations noted:**
+
+| Family | Skill shape | Honest limitation |
+|---|---|---|
+| Deliberative/Reflective | `self-critique` — structured revision protocol, external-signal requirement enforced | Cannot enforce true evaluator independence from within single agent; skill can only *instruct* separation, not *guarantee* it |
+| Developmental/Gestational | `incubation-protocol` — maturity scoring, stage-gate criteria, protected early-phase instructions | Stage routing is instructional not architectural — depends on Claude respecting the instructions |
+| Novelty-Preservation | `divergence-guard` — anti-canon pressure, diversity budgets, sequential sampling instructions | Most mechanisms require population-level operations; single-agent skill can only approximate |
+
+**Don't build as skills — these need architecture, not instructions:**
+
+| Family | Why it doesn't skill-ify |
+|---|---|
+| Coordination/Orchestration | Multi-agent topology is a system design problem, not a prompt problem |
+| Dialectical/Tension-Preserving | Genuine adversarial pressure requires actual stance independence — a skill telling one agent to "argue both sides" is theater |
+| Selection/Competitive | Tournament selection requires a population and a judge; a skill can encode the *criteria* but not the *mechanism* |
+
+---
+
+## The pack I'd actually build
+
+Given the infrastructure and the honest mapping, here's the modular pack structure:
+
+**Core tier — these are load-bearing, build first:**
+
+1. `literature-scout` — retrieval with anti-dominance guards, query diversity, citation hygiene
+2. `hypothesis-forge` — generation with novelty pressure, divergence budgets, canon-departure prompts
+3. `claim-auditor` — claim/evidence separation, verification rubric, calibration marking, evaluator separation instructions
+4. `research-lineage` — memory hygiene, version tracking, failed-path logging, stage transition records
+5. `epistemic-guardrails` — uncertainty propagation, stopping criteria, invisible failure detection
+
+**Domain tier — these extend into specific capability areas:**
+
+6. `wolfram-science` — extend your existing wolfram skill toward scientific computation specifically (already have a strong base)
+7. `paper-architect` — structured paper drafting, section sequencing, argument mapping, consequence tracing before submission
+8. `experiment-logger` — connects to Linear/Craft for persistent experiment state, hypothesis ancestry, result interpretation
+
+**Stage-router (the hard one):**
+
+9. `research-stage-controller` — this is the meta-skill that encodes the stage model explicitly. It's instructional, not architectural, but it's the connective tissue that tells Claude which other skills to activate and when. Without it the other skills are a bag of tools without coordination logic. With it, the pack behaves like a coherent research scaffold.
+
+This one is the highest-risk build — it's doing the most work while having the least architectural support. But it's also the thing that makes the pack a *system* rather than a collection.
+
+---
+
+## Honest recommendation on sequencing
+
+Build `claim-auditor` and `literature-scout` first. They're the highest signal-to-noise skills, they map cleanly, they have MCP leverage, and they solve the two most common failure modes from the research map — retrieval dominance and fluency-truth conflation — directly.
+
+Build `research-stage-controller` last, after you've used the other skills enough to know where stage transitions actually break in practice. Don't design it from theory — design it from observed failure patterns in your own research sessions.
+
+Want to start drafting any of these? I'd start with `claim-auditor` — it's the tightest, highest-value, most evidence-grounded skill in the pack, and it would be a clean first build to test the infrastructure against.
+
+# The Composable Co-Scientist: A Plugin-First Blueprint for Dialectical Ontology Engineering
+
+This report conducts a deep, source-grounded investigation into methodological frameworks adjacent to AI co-scientist architectures, with the explicit goal of determining which mechanisms can be realistically implemented as modular plugins, extensions, or marketplace-deliverable add-ons for theory-forging and ontology development. The analysis prioritizes four core capabilities: preserving productive tension without incoherence, protecting novel but fragile conceptual candidates, synthesizing across distinct theoretical frameworks, and generating nontrivial downstream consequences. Formal refinement is treated as a late-stage crystallization layer rather than a primary driver. Every mechanism is evaluated against stringent packaging constraints, including prompt-packaged workflows, local memory, bounded latency/cost, and user-installable distribution, while explicitly avoiding reliance on privileged infrastructure. The final output provides a detailed architectural recommendation, complete with a minimal viable version and an enhanced version leveraging optional external services, all designed for modularity and composability.
+
+## **Methodological Landscape Mapping: From Co-Scientists to Ontological Engines**
+
+The landscape of methodologies relevant to building a theory-forging engine is a complex tapestry woven from threads of artificial intelligence, philosophy of science, and cognitive psychology. The anchor for this investigation is the public-facing concept of the "AI co-scientist," as exemplified by Google DeepMind's work, which involves multi-agent generate/critique/evolve systems, supervisor-orchestrated asynchronous searches, and tournament-based ranking [[178](https://arxiv.org/html/2512.23707v1), [210](https://arxiv.org/html/2507.01903v1)]. However, a deeper analysis reveals that the most promising approaches often lie at the intersection of several adjacent families of methods, each offering unique mechanisms for handling complexity, uncertainty, and novelty. These families include multi-agent ideation and debate, internal reflection and self-critique, evolutionary and tree-based search, knowledge-graph-guided reasoning, and closed-loop hypothesis testing. Understanding the relationships between these families is crucial for reconstructing a feasible architecture.
+
+Multi-agent systems represent the most direct extension of the co-scientist metaphor. They operate on the principle that complex problems are best solved through collaboration among specialized agents, each simulating a different role such as proponent, critic, or synthesizer [[49](https://arxiv.org/html/2603.11781v1), [72](https://arxiv.org/html/2501.06322v1)]. Systems like QUARE are explicitly designed to manage requirements analysis as a structured negotiation between agents representing conflicting quality attributes [[4](https://arxiv.org/html/2603.11890v1)], while other frameworks facilitate multi-agent debates to improve accuracy on tasks requiring nuanced reasoning [[157](https://aclanthology.org/2024.acl-long.331.pdf), [175](https://arxiv.org/html/2507.05981v1)]. The core strength of this family lies in its ability to directly model and manage contradiction and tension, making it highly relevant for identifying inconsistencies and fostering cross-framework synthesis [[10](https://arxiv.org/pdf/2603.11890)]. However, these systems introduce significant challenges related to orchestration, coherence loss, and computational cost, which become critical barriers when constrained to a plugin environment [[68](https://arxiv.org/pdf/2603.09002), [74](https://arxiv.org/html/2603.12933)].
+
+In contrast to external debate, the family of reflection and self-critique mechanisms focuses on an agent's internal process of reasoning about its own actions and outputs. This paradigm is embodied in patterns like SELF-REFINE and Reflexion, which implement a generate-critique-refine cycle where an agent autonomously evaluates and iteratively improves its performance [[17](https://agent-patterns.readthedocs.io/en/stable/patterns/reflection.html), [105](https://www.researchgate.net/publication/369740347_Self-Refine_Iterative_Refinement_with_Self-Feedback), [170](https://openreview.net/forum?id=vAElhFcKW6)]. This approach is computationally less intensive and easier to debug than multi-agent systems, as it operates within a single LLM instance. Its primary function is to enhance internal consistency and refine existing knowledge rather than generating radical novelty [[48](https://arxiv.org/pdf/2303.17651)]. For ontology development, this mechanism is valuable for polishing and iterating on a candidate structure once it has been generated, but it is less effective at initiating new lines of conceptual exploration. The main weakness of this family is the unreliability of self-evaluation, where LLMs can be inconsistent or overconfident, leading to poor reflection cycles [[169](https://aclanthology.org/2024.acl-long.197/)].
+
+Evolutionary and tree-based search methods offer a powerful framework for exploring vast candidate spaces. Inspired by biological evolution and graph traversal algorithms, these systems treat hypotheses as individuals in a population and apply operators like selection, crossover, and mutation to evolve higher-quality solutions over generations [[44](https://arxiv.org/pdf/2602.15951), [135](https://hal.science/hal-05525481v1/file/_Sok_Agent_Skills.pdf)]. Tree of Thoughts is a prominent example that structures reasoning as a search problem over a tree of partial solutions [[18](https://arxiv.org/pdf/2308.06374)]. This family excels at novelty preservation and navigating complex trade-offs, as seen in multi-objective evolutionary algorithms that explore Pareto fronts to balance competing objectives [[42](https://arxiv.org/pdf/2401.10034), [46](https://arxiv.org/pdf/2410.14716)]. For ontology development, this approach provides a principled way to explore alternative conceptual mappings and avoid premature convergence on a single, potentially suboptimal schema. The primary impediment to its use in a plugin is the high computational and orchestration overhead required to maintain and evolve a large population of candidates, pushing it towards the unrealistic end of the implementation spectrum [[153](https://arxiv.org/pdf/2512.24077)].
+
+Knowledge-graph-guided reasoning represents a more structured approach, grounding an agent's operations in a formal, explicit representation of facts and relationships [[18](https://arxiv.org/pdf/2308.06374)]. In this paradigm, a knowledge graph (KG) serves as a persistent store of information that the LLM can query to ground its generation and guide its reasoning paths [[103](https://www.arxivdaily.com/thread/77814)]. This family is particularly well-suited for ontology development, as an ontology is, by definition, a type of knowledge graph [[1](https://www.mdpi.com/2076-3417/16/3/1539), [2](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1668385/pdf)]. KGs provide a natural substrate for defining concepts, properties, and hierarchies, and can help mitigate hallucination by tethering the agent's output to verifiable data [[62](https://aclanthology.org/volumes/2025.findings-emnlp/)]. However, this rigidity can also be a weakness; a pre-existing graph can impose structural biases that stifle truly novel conceptualizations that do not fit the established schema [[1](https://www.mdpi.com/2076-3417/16/3/1539)]. Furthermore, heavy reliance on retrieval from a KG can constrain generative capacity, turning the system into a curator of existing knowledge rather than a creator of new theory [[55](https://arxiv.org/html/2505.04651v1)].
+
+Finally, the family of closed-loop hypothesis-testing systems draws heavily from the philosophy of science, modeling theory development as a dynamic process of generating explanations, deducing their consequences, and testing them against evidence [[29](https://arxiv.org/html/2505.21935v1), [30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039)]. Central to this approach is abductive inference, or "inference to the best explanation," which drives the generation of hypotheses to account for anomalous observations [[28](https://www.mdpi.com/2409-9287/7/2/35), [31](https://www.sciencedirect.com/science/article/abs/pii/S0007850612000649)]. This mechanism is explicitly designed to produce nontrivial downstream consequences, a key requirement for a functional ontology [[30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039)]. Frameworks like RECAP demonstrate this feedback loop by having an agent iteratively extract information based on its own evaluations [[15](https://arxiv.org/html/2510.25941v3)]. The main challenge for this family is the need for contact with an external reality—either through simulation, experimentation, or empirical data—to perform meaningful tests [[222](https://arxiv.org/html/2602.02905v1)]. Without this, the process risks becoming a purely linguistic exercise. In a plugin context, consequence generation can be simulated internally, but true validation would require integration with external tools, pushing it toward a hybrid implementation class.
+
+## **Mechanism Taxonomy and Family-by-Family Analysis**
+
+This section provides a detailed examination of the primary methodology families identified in the preceding analysis. Each family is dissected to reveal its core mechanism, notable exemplars, strengths, weaknesses, and typical failure modes. Crucially, each is then assessed for its transfer value to ontology development and classified according to its implementation feasibility as a plugin, extension, or marketplace package. This classification distinguishes between mechanisms that can be implemented directly within a plugin's constraints (Class A), those that require optional lightweight external services (Class B), and those deemed unrealistic for this delivery model (Class C).
+
+### **Family 1: Multi-Agent Ideation, Debate, and Peer Review**
+
+This family of methodologies is built upon the premise that collaborative interaction among multiple specialized agents leads to superior outcomes compared to a single, monolithic system. The core mechanism involves decomposing a complex task into roles, with each LLM acting as an autonomous agent responsible for a specific aspect of the problem-solving process [[72](https://arxiv.org/html/2501.06322v1), [75](https://arxiv.org/html/2502.09596v1)]. These agents then interact through structured protocols such as debate, voting, negotiation, or hierarchical delegation to collectively arrive at a solution [[49](https://arxiv.org/html/2603.11781v1), [173](https://arxiv.org/html/2502.19130v4)].
+
+Notable systems and frameworks within this family include Magentic-One, which uses an orchestrator agent to plan and track progress, recovering from errors by re-planning [[73](https://arxiv.org/html/2411.04468v1)]; AutoGen, a popular framework for creating customizable multi-agent conversational flows [[227](https://zhuanlan.zhihu.com/p/1984725399767376336)]; and various implementations of multi-agent debate for tasks ranging from software engineering to scientific discovery [[127](https://arxiv.org/html/2506.00066v1), [176](https://openreview.net/pdf?id=sy7eSEXdPC)]. A key application is in requirements engineering, where the QUARE framework employs five specialized agents to negotiate and balance conflicting quality attributes [[4](https://arxiv.org/html/2603.11890v1), [10](https://arxiv.org/pdf/2603.11890)]. Research has shown that multi-agent debate can improve the accuracy of LLMs on complex reasoning tasks by exposing flaws in individual reasoning chains [[157](https://aclanthology.org/2024.acl-long.331.pdf), [175](https://arxiv.org/html/2507.05981v1)].
+
+The primary strengths of this family align closely with the user's research goals. For **contradiction/tension handling**, assigning agents to defend opposing viewpoints forces the system to confront inconsistencies head-on, making it a powerful tool for identifying logical conflicts within a developing theory [[156](https://openreview.net/pdf?id=EdTt8nMAMA)]. For **cross-framework synthesis**, agents can be assigned to represent different paradigms or domains, allowing the system to explore connections and synthesize insights that might be missed by a single perspective [[132](https://www.tandfonline.com/doi/full/10.1080/17538947.2026.2633849)]. The diversity of generated outputs can also foster **novelty**, as the interplay of different agent "personalities" can lead to creative solutions [[77](https://arxiv.org/pdf/2506.17784)]. Finally, by structuring interactions around critique and evaluation, these systems inherently support a form of peer review.
+
+However, the weaknesses and failure modes are significant, especially under the lens of plugin feasibility. A major issue is **coherence loss and path dependence**. An error or incoherence introduced by one agent can cascade through the system, causing dependent agents to fail as well, leading to a brittle and unreliable chain of reasoning [[68](https://arxiv.org/pdf/2603.09002)]. Another critical failure mode is **over-competition and premature convergence**. Competitive pressure within a debate setting can undermine both performance and reliability, causing agents to converge prematurely on a suboptimal solution rather than continuing to explore the possibility space, thereby sterilizing novelty [[233](https://arxiv.org/html/2509.26126v1)]. The **implementation cost** is another major barrier. Most sophisticated multi-agent systems require complex, custom-built orchestration layers to manage agent communication, routing, and state tracking [[73](https://arxiv.org/html/2411.04468v1), [74](https://arxiv.org/html/2603.12933)]. This level of orchestration is typically outside the scope of a simple plugin and often relies on proprietary backend services, placing it in Class C (Unrealistic). Simpler, synchronous debate loops (e.g., Agent A generates, Agent B critiques, Agent C synthesizes) could potentially be implemented within a single, long prompt sequence, placing them in Class A, but they lack the power of more dynamic systems.
+
+For **ontology development**, this family transfers exceptionally well conceptually. It is ideal for the initial phases of theory formation, where the goal is to generate diverse perspectives, identify tensions between them, and begin the process of synthesis. However, for a practical plugin implementation, the complexity of full-scale debate systems makes them largely impractical. Simpler, structured dialogue patterns might be implementable, but the risk of cascading failures and the difficulty of debugging make them a high-risk choice.
+
+| Attribute | Description | Source(s) |
+| :--- | :--- | :--- |
+| **Core Mechanism** | Decomposition of a task into roles for multiple LLM agents who interact via structured protocols (debate, negotiation, voting) to solve a problem. | [[49](https://arxiv.org/html/2603.11781v1), [72](https://arxiv.org/html/2501.06322v1), [173](https://arxiv.org/html/2502.19130v4)] |
+| **Strengths** | Excellent for contradiction handling, cross-framework synthesis, and novelty generation through diverse perspectives. Can improve accuracy on complex tasks. | [[10](https://arxiv.org/pdf/2603.11890), [77](https://arxiv.org/pdf/2506.17784), [156](https://openreview.net/pdf?id=EdTt8nMAMA), [157](https://aclanthology.org/2024.acl-long.331.pdf)] |
+| **Weaknesses** | Prone to coherence loss, path dependence, and over-competition. High implementation cost and orchestration complexity. | [[68](https://arxiv.org/pdf/2603.09002), [73](https://arxiv.org/html/2411.04468v1), [74](https://arxiv.org/html/2603.12933), [233](https://arxiv.org/html/2509.26126v1)] |
+| **Typical Failure Modes** | Cascading coherence failures, premature convergence, brittle reasoning chains, and unpredictable emergent behaviors. | [[68](https://arxiv.org/pdf/2603.09002), [233](https://arxiv.org/html/2509.26126v1)] |
+| **Transfer Value to Ontology Work** | High. Excellent for initial stages of generating divergent theories, identifying conceptual tensions, and synthesizing disparate viewpoints. | [[10](https://arxiv.org/pdf/2603.11890), [156](https://openreview.net/pdf?id=EdTt8nMAMA)] |
+| **Implementation Class** | Primarily **C (Unrealistic)** due to high orchestration and cost. Simple, synchronous debate loops may be **A (Direct Plugin)**. | [[73](https://arxiv.org/html/2411.04468v1), [74](https://arxiv.org/html/2603.12933)] |
+
+### **Family 2: Reflection, Self-Critique, and Deliberation**
+
+This family of methodologies centers on an agent's ability to engage in introspection and iterative improvement. The core mechanism is a cyclical process, often termed "generate-critique-refine," where an agent first produces an initial output, then analyzes its own performance or the quality of the output, and finally uses the insights from this analysis to generate a refined subsequent attempt [[17](https://agent-patterns.readthedocs.io/en/stable/patterns/reflection.html), [87](https://arxiv.org/html/2602.07187v1), [229](https://arxiv.org/html/2603.11768v1)]. This pattern allows the agent to learn from its mistakes and progressively hone its results without requiring external human intervention for every step.
+
+Key exemplars of this approach include the SELF-REFINE framework, which improves initial LLM outputs through iterative self-feedback on diverse tasks like dialog generation and mathematical reasoning [[48](https://arxiv.org/pdf/2303.17651), [105](https://www.researchgate.net/publication/369740347_Self-Refine_Iterative_Refinement_with_Self-Feedback)]. The Reflexion framework extends this idea by incorporating verbal reinforcement learning, where the agent maintains a "reflection trace" of past failures and successes, using this memory to inform future strategies [[47](https://arxiv.org/html/2503.23037v3), [170](https://openreview.net/forum?id=vAElhFcKW6)]. Similarly, the RECAP framework uses a feedback loop where an agent evaluates its own extraction attempts and guides the model toward more faithful results in subsequent iterations [[15](https://arxiv.org/html/2510.25941v3)]. This pattern has also been applied to code generation, where CYCLE iteratively refines code based on execution feedback and prior attempts [[187](https://academiccommons.columbia.edu/doi/10.7916/4at0-w986/download)].
+
+The main strength of this family is its efficiency and focus. It primarily targets improvements in **internal consistency** and the **iterative refinement** of outputs. For **conceptual consequence generation**, a reflection module could be tasked with analyzing the implications of a proposed theory and identifying logical gaps or unexplored ramifications. For **novelty preservation**, however, this mechanism is less effective. Its primary function is to refine and polish existing knowledge rather than to venture into truly uncharted conceptual territory. It can help preserve the integrity of a novel idea during the refinement phase, but it is not a primary driver of novelty itself.
+
+The weaknesses are tied to the reliability of the introspective process. LLMs have been observed to exhibit overconfidence or high randomness when self-evaluating, providing stubborn or inconsistent feedback that can degrade performance instead of improving it—a phenomenon known as the "reflection paradox" [[169](https://aclanthology.org/2024.acl-long.197/)]. This can lead to stagnation or divergence from a good trajectory. Like memory, a flawed reflection can create a strong **path dependence**, locking the agent into a suboptimal line of reasoning. Furthermore, the entire process is susceptible to the inherent biases of the underlying language model, a concern highlighted by research showing that AI discourse in pretraining data can influence model alignment and behavior [[107](https://arxiv.org/html/2601.10160v2)].
+
+For **ontology development**, this family is highly applicable. Once a candidate ontology or conceptual structure has been generated, a reflection module could be invaluable for critiquing its design against principles of parsimony, coherence, and explanatory power. This fits perfectly with the user's goal of treating formal refinement as a late-stage crystallization layer. For a plugin implementation, this mechanism is very promising. Each step of the generate-reflection-refine loop can be implemented as a discrete function or a sequence of prompts, making it a strong candidate for Class A (Direct Plugin Implementation). It is modular, debuggable, and does not require complex external orchestration.
+
+| Attribute | Description | Source(s) |
+| :--- | :--- | :--- |
+| **Core Mechanism** | Iterative "generate-critique-refine" cycle where an agent reflects on its own outputs or actions to iteratively improve its performance. | [[17](https://agent-patterns.readthedocs.io/en/stable/patterns/reflection.html), [87](https://arxiv.org/html/2602.07187v1), [229](https://arxiv.org/html/2603.11768v1)] |
+| **Strengths** | Efficient, focused on internal consistency and iterative refinement. Proven effective for improving code, dialogue, and reasoning. | [[48](https://arxiv.org/pdf/2303.17651), [187](https://academiccommons.columbia.edu/doi/10.7916/4at0-w986/download)] |
+| **Weaknesses** | Reliability of self-evaluation is poor; can be overconfident or random. Stagnation or path dependence from flawed reflections. | [[169](https://aclanthology.org/2024.acl-long.197/)] |
+| **Typical Failure Modes** | Overconfidence in self-evaluation, inconsistent feedback, performance degradation, and entrapment in bad solution trajectories. | [[169](https://aclanthology.org/2024.acl-long.197/)] |
+| **Transfer Value to Ontology Work** | High for refining and critiquing candidate ontologies. Moderate for generating consequences by prompting the agent to analyze implications. | [[87](https://arxiv.org/html/2602.07187v1), [170](https://openreview.net/forum?id=vAElhFcKW6)] |
+| **Implementation Class** | **A (Direct Plugin Implementation)**. The workflow is modular and can be contained within a single plugin's logic. | [[17](https://agent-patterns.readthedocs.io/en/stable/patterns/reflection.html), [105](https://www.researchgate.net/publication/369740347_Self-Refine_Iterative_Refinement_with_Self-Feedback)] |
+
+### **Family 3: Evolutionary Search, Tree Search, and Branching**
+
+This family models the process of discovery as a search through a vast space of possibilities. The core mechanism is inspired by Darwinian evolution or computer science search algorithms, treating hypotheses as "individuals" in a "population." These individuals are evaluated based on a fitness function, and then selective pressure is applied through processes like tournament selection, crossover (combining elements of two ideas), and mutation (randomly altering an idea) to evolve a better set of candidates over successive "generations" [[43](https://arxiv.org/pdf/2603.11863), [44](https://arxiv.org/pdf/2602.15951)]. Alternatively, in tree search methods like Tree of Thoughts, reasoning is structured as a traversal of a tree where nodes represent partial solutions and edges represent steps of thought [[18](https://arxiv.org/pdf/2308.06374)].
+
+Exemplars of this approach include Eureka, which uses evolutionary search to autonomously design reward functions for robotic skill acquisition [[135](https://hal.science/hal-05525481v1/file/_Sok_Agent_Skills.pdf)], and MadEvolve, which applies evolutionary optimization to cosmological algorithms [[44](https://arxiv.org/pdf/2602.15951)]. In the context of multi-objective problems, frameworks like NSGA-III are used to find Pareto-optimal sets of solutions that balance trade-offs between competing goals, such as estimation accuracy and complexity [[42](https://arxiv.org/pdf/2401.10034), [46](https://arxiv.org/pdf/2410.14716)]. LoongFlow presents a directed evolutionary search system that uses a cognitive plan to guide its search, transforming its memory into a structured knowledge graph to enable causal queries [[152](https://arxiv.org/html/2512.24077v1), [153](https://arxiv.org/pdf/2512.24077)].
+
+The primary strength of this family is its systematic approach to **exploration and novelty preservation**. By maintaining a diverse population and applying stochastic operators like mutation, it is designed to avoid getting trapped in local optima and to continuously discover new regions of the possibility space [[43](https://arxiv.org/pdf/2603.11863)]. This is directly aligned with the goal of protecting radical but fertile candidates. For **cross-framework synthesis**, the crossover operator provides a natural mechanism for combining elements from different theoretical frameworks to create hybrid concepts. The ability to navigate Pareto fronts is also highly relevant for ontology development, where one might need to balance trade-offs between simplicity, expressiveness, and coverage.
+
+The weaknesses are formidable, particularly regarding implementation feasibility. The foremost issue is **computational expense**. Generating, evaluating, and evolving a sufficiently large population of candidates is extremely resource-intensive, violating the bounded cost and latency constraints of a typical plugin [[218](https://arxiv.org/html/2603.16734v1)]. This places full-fledged evolutionary engines in Class C (Unrealistic). Another major challenge is **orchestration complexity**. Managing the evolution loop, tracking fitness scores, and implementing genetic operators requires a level of programmatic control that goes far beyond simple prompt engineering [[153](https://arxiv.org/pdf/2512.24077)]. Finally, there is a risk of **premature convergence**, where the algorithm quickly settles on a suboptimal solution if selection pressure is too strong or diversity is lost too early.
+
+For **ontology development**, this family offers a powerful conceptual framework for exploring different ways to structure a domain. The principles of maintaining diversity, balancing trade-offs, and systematically exploring alternatives are highly desirable. However, implementing a true evolutionary search is out of the question for a plugin. The value lies in adopting the *principles* as heuristics. For example, a plugin could implement a simple "diversity-preserving" strategy by generating a small set of alternative hypotheses using mutation-like techniques (e.g., "re-imagine this concept from a different philosophical perspective") and keeping them all active for consideration. This captures the spirit of exploration without the prohibitive cost.
+
+| Attribute | Description | Source(s) |
+| :--- | :--- | :--- |
+| **Core Mechanism** | Search through a candidate space using principles from evolutionary algorithms (selection, crossover, mutation) or tree/graph traversal. | [[18](https://arxiv.org/pdf/2308.06374), [43](https://arxiv.org/pdf/2603.11863), [44](https://arxiv.org/pdf/2602.15951)] |
+| **Strengths** | Explicitly designed for exploration, novelty preservation, and navigating trade-offs (Pareto optimization). Natural mechanism for cross-framework synthesis. | [[42](https://arxiv.org/pdf/2401.10034), [43](https://arxiv.org/pdf/2603.11863), [46](https://arxiv.org/pdf/2410.14716)] |
+| **Weaknesses** | Extremely high computational and orchestration cost. Risk of premature convergence. Difficult to debug and control. | [[153](https://arxiv.org/pdf/2512.24077), [218](https://arxiv.org/html/2603.16734v1), [233](https://arxiv.org/html/2509.26126v1)] |
+| **Typical Failure Modes** | Premature convergence to local optima, excessive computation, and loss of diversity in the population. | [[153](https://arxiv.org/pdf/2512.24077), [233](https://arxiv.org/html/2509.26126v1)] |
+| **Transfer Value to Ontology Work** | High. Provides a robust framework for exploring alternative conceptual structures, balancing competing ontological commitments, and preserving novelty. | [[42](https://arxiv.org/pdf/2401.10034), [43](https://arxiv.org/pdf/2603.11863)] |
+| **Implementation Class** | **C (Unrealistic)** for full implementations. Principles can be adapted as heuristics in **A (Direct Plugin)**. | [[153](https://arxiv.org/pdf/2512.24077), [218](https://arxiv.org/html/2603.16734v1)] |
+
+### **Family 4: Knowledge-Graph-Guided Reasoning and Retrieval-Augmented Discovery**
+
+This family grounds an agent's reasoning process in explicit, structured knowledge represented as a knowledge graph (KG) or retrieved from an external corpus via a vector store. The core mechanism involves using the graph's nodes and edges as a semantic map for reasoning, or using retrieved documents to provide grounding and factual constraints for the LLM's generation process [[18](https://arxiv.org/pdf/2308.06374), [64](https://www.scribd.com/document/908530342/Building-AI-Agents-With-LLMs-RAG-And-Knowledge-Graphs-1)]. KGs serve as a foundational bridge between AI and various domains, enabling structured knowledge frameworks that enhance data interoperability and reasoning [[2](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1668385/pdf), [82](https://pmc.ncbi.nlm.nih.gov/articles/PMC12426170/)].
+
+Systems in this category leverage LLMs to construct, query, and reason over KGs. For instance, some research focuses on using LLMs to build comprehensive knowledge graphs for domains like sepsis prediction from clinical data [[209](https://pmc.ncbi.nlm.nih.gov/articles/PMC11986385/)]. Other approaches use KGs to provide explanations for an agent's decisions, with the reasoning process visualized as traversals over the graph [[183](https://theses.hal.science/tel-05279250v1/file/NAQVI_Syed.pdf)]. The combination of LLMs with RAG and KGs is presented as a practical guide for building modern AI agents [[195](https://www.scribd.com/document/997872736/Building-AI-Agents-With-LLMs-RAG-and-Knowledge-Graphs)]. The ODK (Ontology Development Kit) provides a toolkit for building and maintaining ontologies, reflecting standard practices in the field [[164](https://academic.oup.com/database/article/doi/10.1093/database/baac087/6754192)].
+
+The primary strength of this family is its ability to provide a **structured representation** of knowledge, which is a natural fit for ontology development [[1](https://www.mdpi.com/2076-3417/16/3/1539)]. It facilitates **cross-framework synthesis** by providing a common substrate onto which different conceptual frameworks can be mapped. The use of KGs and RAG helps ensure **faithfulness to data** and reduces hallucination by anchoring the agent's output to verifiable sources [[62](https://aclanthology.org/volumes/2025.findings-emnlp/)]. New connections formed within the graph can represent synthesized insights, making it a powerful tool for ontology growth.
+
+However, this family is not without significant weaknesses. A major failure mode is **graph-induced rigidity**. A pre-existing graph schema can impose structural constraints that prevent the emergence of radical, out-of-schema concepts that are necessary for breakthrough thinking [[1](https://www.mdpi.com/2076-3417/16/3/1539)]. This rigidity can stifle the kind of novelty the system is meant to foster. Another critical issue is the **tension between grounding and generativity**. While retrieval is essential for grounding, an over-reliance on it can turn the system into a passive curator of existing knowledge, unable to generate truly novel hypotheses that are not already present in the source material [[55](https://arxiv.org/html/2505.04651v1)]. This creates a conflict between the need to be grounded in reality and the need to explore new possibilities.
+
+For **ontology development**, this family maps almost perfectly. An ontology *is* a knowledge graph, so these methods provide the native tools for building and reasoning about the final artifact. For a plugin implementation, a full, persistent KG with a complex backend is Class C (Unrealistic). However, the plugin can act as a client to an external KG service. Therefore, this is best classified as **Class B (Plugin + External Service)**. The plugin would contain the logic for querying and updating the graph, while an optional external service (which could be a simple file-based database or a lightweight API) would handle the persistence and storage. This separation allows the plugin to remain generic and swappable, while still providing powerful graph-aware capabilities.
+
+| Attribute | Description | Source(s) |
+| :--- | :--- | :--- |
+| **Core Mechanism** | Reasoning guided by a structured knowledge graph or grounded in retrieved information from a corpus. | [[18](https://arxiv.org/pdf/2308.06374), [64](https://www.scribd.com/document/908530342/Building-AI-Agents-With-LLMs-RAG-And-Knowledge-Graphs-1)] |
+| **Strengths** | Provides structured representation, enhances data interoperability, and reduces hallucination through grounding. | [[2](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1668385/pdf), [62](https://aclanthology.org/volumes/2025.findings-emnlp/), [82](https://pmc.ncbi.nlm.nih.gov/articles/PMC12426170/)] |
+| **Weaknesses** | Pre-existing graphs can induce rigidity, stifling radical novelty. Heavy reliance on retrieval can constrain generative capacity. | [[1](https://www.mdpi.com/2076-3417/16/3/1539), [55](https://arxiv.org/html/2505.04651v1)] |
+| **Typical Failure Modes** | Path dependence on graph schema, premature convergence to existing knowledge, and sterile reasoning. | [[1](https://www.mdpi.com/2076-3417/16/3/1539)] |
+| **Transfer Value to Ontology Work** | Very High. Provides the native tools for constructing, querying, and reasoning about ontologies. | [[1](https://www.mdpi.com/2076-3417/16/3/1539), [2](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2025.1668385/pdf)] |
+| **Implementation Class** | **B (Plugin + Optional External Service)**. The plugin acts as a client to an external KG/database service. | [[18](https://arxiv.org/pdf/2308.06374), [195](https://www.scribd.com/document/997872736/Building-AI-Agents-With-LLMs-RAG-and-Knowledge-Graphs)] |
+
+### **Family 5: Closed-Loop Hypothesis Testing and Abductive Inference**
+
+This family of methodologies is deeply rooted in the philosophy of science, particularly the work of Karl Popper and Imre Lakatos, and models theory development as a dynamic, iterative process [[158](https://plato.stanford.edu/entries/lakatos/), [159](https://www.researchgate.net/publication/395209391_Popper's_and_Lakatos's_philosophies_of_science_main_differences)]. The core mechanism revolves around generating a hypothesis, deducing its testable consequences, and then testing those consequences to confirm, disconfirm, or revise the original hypothesis [[29](https://arxiv.org/html/2505.21935v1), [30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039)]. This creates a closed loop of inquiry. A central reasoning pattern in this family is abduction, or "inference to the best explanation," which drives the generation of novel hypotheses to explain surprising observations or data anomalies [[28](https://www.mdpi.com/2409-9287/7/2/35), [31](https://www.sciencedirect.com/science/article/abs/pii/S0007850612000649), [60](https://www.mdpi.com/2227-9717/14/2/322)].
+
+Frameworks in this area aim to automate this scientific cycle. One generalizable active learning workflow integrates top-down, theory-driven hypothesis generation with bottom-up consequence testing [[120](https://arxiv.org/abs/2509.18604)]. The RECAP framework demonstrates a similar feedback loop, where an agent evaluates its own extraction attempts and iteratively guides the model [[15](https://arxiv.org/html/2510.25941v3)]. The EviPath framework synthesizes evidence-anchored reasoning trajectories to train retrieval-augmented generation models, emphasizing the link between evidence and reasoning paths [[57](https://openreview.net/forum?id=alNQNzaWhI)]. Abductive reasoning has also been integrated into formal verification systems to test and revise control hypotheses [[56](https://dl.acm.org/doi/full/10.1145/3656413), [95](https://hal.science/hal-04287029v1/document)].
+
+The primary strength of this family is its focus on **generating nontrivial downstream consequences**, which is a direct answer to one of the user's core requirements [[30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039)]. It moves beyond static definitions to a functional understanding of concepts. The use of abductive inference provides a powerful engine for **novelty generation**, as it is specifically designed to propose new explanations for puzzling phenomena. The epistemological foundation in the philosophy of science gives this approach a robust framework for managing the lifecycle of a theory, from its inception to its validation or falsification.
+
+The main weakness is the **dependence on external contact** for meaningful testing. While counterfactual reasoning can be performed internally, true validation requires interaction with the world, either through simulation, experiments, or empirical observation [[222](https://arxiv.org/html/2602.02905v1)]. Without this, the "test" becomes a linguistic or logical exercise, which may lack the ultimate pressure of empirical reality. Furthermore, the ability of LLMs to perform robust counterfactual and causal reasoning is still an active area of research and not yet fully mature [[21](https://aclanthology.org/2024.acl-long.593.pdf), [22](https://openreview.net/forum?id=aya06N6R4W)]. This creates a gap between the idealized closed-loop and what is practically achievable.
+
+For **ontology development**, this family is highly relevant. It provides a dynamic process for moving from a set of static definitions to a functional, testable model of a domain. The ability to generate consequences helps uncover implicit properties and relationships within the ontology. For plugin implementation, the generation and evaluation of consequences can be done entirely within the plugin's local context (Class A). However, if the system is intended to perform actual simulations or run experiments, it requires external tool calls, pushing it toward Class B. For pure ontology work, the internal consequence-generation capability is likely sufficient.
+
+| Attribute | Description | Source(s) |
+| :--- | :--- | :--- |
+| **Core Mechanism** | A closed-loop process of generating hypotheses, deducing consequences, and testing them, often driven by abductive inference ("inference to the best explanation"). | [[29](https://arxiv.org/html/2505.21935v1), [30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039), [31](https://www.sciencedirect.com/science/article/abs/pii/S0007850612000649)] |
+| **Strengths** | Explicitly generates nontrivial consequences. Powerful engine for novelty generation via abduction. Strong epistemological foundation. | [[28](https://www.mdpi.com/2409-9287/7/2/35), [30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039), [31](https://www.sciencedirect.com/science/article/abs/pii/S0007850612000649)] |
+| **Weaknesses** | Requires external contact for meaningful testing. LLMs' ability to perform robust counterfactual reasoning is still developing. | [[21](https://aclanthology.org/2024.acl-long.593.pdf), [22](https://openreview.net/forum?id=aya06N6R4W), [222](https://arxiv.org/html/2602.02905v1)] |
+| **Typical Failure Modes** | Becomes a purely linguistic exercise without external validation. Failure in robust counterfactual reasoning can lead to invalid conclusions. | [[21](https://aclanthology.org/2024.acl-long.593.pdf), [222](https://arxiv.org/html/2602.02905v1)] |
+| **Transfer Value to Ontology Work** | High. Provides a dynamic process for moving from static definitions to a functional, testable model of a domain. | [[30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039), [31](https://www.sciencedirect.com/science/article/abs/pii/S0007850612000649)] |
+| **Implementation Class** | **A (Direct Plugin)** for consequence generation. **B (Optional External Service)** if actual simulation/experimentation is required. | [[30](https://onlinelibrary.wiley.com/doi/10.1002/joom.70039), [222](https://arxiv.org/html/2602.02905v1)] |
+
+## **Plugin/Marketplace Feasibility and Implementation Constraints**
+
+Translating the rich landscape of AI methodologies into a practical, distributable plugin for a marketplace requires subjecting each mechanism to a rigorous set of implementation constraints. These constraints are not merely technical hurdles but fundamental design principles that dictate what is realistically achievable. The analysis must go beyond abstract architectural descriptions and ask concrete questions about state management, orchestration, memory, cost, latency, permissions, safety, debuggability, and composability. Applying these filters is crucial for distinguishing between academically interesting proposals and commercially viable skills.
+
+State management is a primary constraint. A successful plugin must manage its state effectively without relying on privileged platform hooks. This means state should be passed between steps via structured objects or managed within a constrained local memory, such as a file-based log or a simple key-value store accessible to the plugin [[12](https://arxiv.org/html/2511.03690v1)]. Many advanced agent systems rely on complex, centralized state managers or persistent server-side databases, which are inaccessible to a standard plugin [[167](http://lonepatient.top/2026/01/30/arxiv_papers_2026-01-30.html)]. For instance, the IronEngine platform is organized around a unified orchestration core connecting a desktop user to various tools, a level of integration that is not available to a third-party developer [[186](https://www.researchgate.net/publication/401719780_IronEngine_Towards_General_AI_Assistant), [189](https://arxiv.org/pdf/2603.08425)]. Therefore, any mechanism requiring bespoke state management falls into the unrealistic (Class C) category. Mechanisms that can encapsulate their state within the arguments of function calls or a few local files are more likely to succeed.
+
+Orchestration is another critical barrier. Complex agent systems, particularly multi-agent frameworks, often require sophisticated orchestration to manage the flow of information between agents, route tasks, and resolve dependencies [[73](https://arxiv.org/html/2411.04468v1), [74](https://arxiv.org/html/2603.12933)]. This is a major point of failure and a significant implementation burden. Routing agents efficiently to appropriate modules is an active research area in itself, with techniques like ant colony optimization being explored to improve system efficiency [[74](https://arxiv.org/html/2603.12933)]. Any mechanism that depends on continuous, background orchestration or recursive delegation controllers pushes beyond the capabilities of a simple plugin and into the realm of dedicated services [[224](https://arxiv.org/html/2603.13256v1)]. The simplest, most reliable plugins will feature a linear or simple branching workflow controlled directly by the host agent's prompt logic, rather than a complex, self-contained scheduler.
+
+Memory presents a dual challenge of persistence and utility. While a plugin can access local or file-based memory, the amount and type of memory it can reasonably manage are limited [[12](https://arxiv.org/html/2511.03690v1)]. Long-term memory is a key challenge for LLM agents, as they struggle to retain lessons from past failures without becoming rigid or path-dependent [[53](https://arxiv.org/html/2510.04851v1), [129](https://www.researchgate.net/publication/398392208_Memory_in_LLM-based_Multi-agent_Systems_Mechanisms_Challenges_and_Collective_Intelligence), [236](https://arxiv.org/html/2505.10571v5)]. A plugin for ontology development needs to remember the history of its conceptual explorations to build upon previous work, but it cannot afford to be locked into a single path. This suggests a need for a structured memory representation, perhaps a log of candidate theories, their critiques, and synthesized outcomes, as opposed to a simple, unstructured conversation history [[154](https://pmc.ncbi.nlm.nih.gov/articles/PMC10104124/)]. While a file-based log is feasible (Class A), a plugin cannot realistically manage a large-scale, persistent knowledge graph or a complex episodic memory system on its own, which would require an external service (Class B) or be deemed unrealistic (Class C).
+
+Cost and latency are hard economic realities of the marketplace. Users expect prompt responses and are sensitive to usage costs. Any mechanism that requires dozens of parallel LLM calls, extensive computation per turn, or recursive self-invocation is likely to be prohibitively expensive and slow [[218](https://arxiv.org/html/2603.16734v1)]. This immediately rules out many forms of deep, multi-generational evolutionary search or large-scale, multi-round debates [[44](https://arxiv.org/pdf/2602.15951), [135](https://hal.science/hal-05525481v1/file/_Sok_Agent_Skills.pdf)]. Simpler, more focused mechanisms like a single-pass self-reflection are much more viable. The design must prioritize token efficiency and minimize the number of expensive LLM calls, favoring cheaper operations like string manipulation or simple database queries where possible.
+
+Permissions, safety, and debuggability are paramount for marketplace distribution. A plugin must operate within a sandboxed environment and request only the permissions it absolutely needs [[12](https://arxiv.org/html/2511.03690v1)]. It must be safe, reliable, and free from harmful biases or behaviors [[61](https://dl.acm.org/doi/full/10.1145/3703454)]. Perhaps most importantly, it must be debuggable. Asynchronous background daemons, complex, non-deterministic interactions between multiple agents, and opaque internal states make debugging nearly impossible, which is a deal-breaker for a professional-grade tool [[52](https://www.linkedin.com/posts/naved-khan-093167137_10-ai-agent-mistakes-that-kill-your-interview-activity-7430813379402878977-ypWY), [81](https://arxiv.org/pdf/2508.08127)]. A transparent, step-by-step workflow where each action is a clear, inspectable function call is vastly preferable. Reproducible behavior is also essential for trust and usability [[89](https://developer.nvidia.com/blog/an-easy-introduction-to-llm-reasoning-ai-agents-and-test-time-scaling/)].
+
+Composability and installability are the final pieces of the puzzle. A plugin's success often depends on its ability to be mixed and matched with other skills to create a larger, more capable agent [[11](https://www.linkedin.com/posts/jatingargiitk_theres-something-deep-about-what-openclaw-activity-7432294531875762176-227j)]. This requires clear interfaces and well-defined inputs and outputs. A plugin that exposes its functionality as a set of modular, composable sub-skills is more valuable than a monolithic black box [[11](https://www.linkedin.com/posts/jatingargiitk_theres-something-deep-about-what-openclaw-activity-7432294531875762176-227j)]. The installation process must be straightforward, requiring no special setup or configuration beyond what is standard for the platform. This favors solutions that are self-contained and do not depend on complex, external dependencies that the user must manually install and manage.
+
+In summary, the plugin/marketplace reality imposes a powerful filter on AI architectures. It favors simplicity, transparency, and efficiency over complexity, opacity, and raw power. Mechanisms that can be expressed as a series of prompt-based workflows, use ordinary tool calls and local files for state, and do not require privileged access or continuous background execution are the most likely to succeed. This reality check is why many cutting-edge research proposals, despite their intellectual merit, are ultimately relegated to the "unrealistic" (Class C) category. The most promising candidates are those that can translate complex, high-level concepts into simple, robust, and efficient procedural steps.
+
+## **Adversarial Critique: Separating Substance from Hype**
+
+Applying an adversarial lens is essential to cut through the hype surrounding many AI agent architectures and to identify their true capabilities and limitations. This critique must interrogate each methodology not just on its surface claims but on its underlying assumptions, hidden costs, and potential for failure. Several recurring themes emerge from a critical analysis of the literature: the danger of proxy optimization, the prevalence of hidden infrastructure assumptions, the risk of benchmark overfitting, and the fragility of complex systems.
+
+One of the most insidious pitfalls is **proxy optimization**. Many systems are optimized for metrics that correlate with, but are not identical to, the desired real-world capabilities. For example, a multi-agent debate system might be optimized for winning a majority vote on a benchmark dataset, but this doesn't guarantee it produces the most coherent or insightful synthesis [[173](https://arxiv.org/html/2502.19130v4)]. Similarly, an evolutionary algorithm might be tuned to maximize a fitness score on a specific task, only to generate solutions that are brittle or lack generalizability. The "shortcut problem" in MLLM evaluation highlights this issue, where models learn to exploit superficial cues in questions rather than performing genuine reasoning [[90](http://lonepatient.top/2026/03/04/arxiv_papers_2026-03-04.html)]. A plugin developer must be wary of optimizing for any metric that is not a direct proxy for productive tension, novelty preservation, or conceptual consequence generation. The risk is that the system becomes excellent at solving the training problem but fails at open-ended theory forging.
+
+A second critical flaw is the reliance on **hidden infrastructure assumptions**. Publicly described systems like the "AI co-scientist" are often impressive demonstrations, but their reported performance likely depends on a massive, proprietary infrastructure that is unavailable to a marketplace developer [[178](https://arxiv.org/html/2512.23707v1), [210](https://arxiv.org/html/2507.01903v1)]. This includes privileged access to internal orchestration hooks, custom ranking services, unrestricted persistent server-side state, and arbitrary background daemons [[73](https://arxiv.org/html/2411.04468v1)]. Assuming such access is a fundamental error in designing a plug-in. For example, Magentic-One's effectiveness hinges on its Orchestrator agent, which manages planning and error recovery—a level of control that is not part of a standard agent's toolkit [[73](https://arxiv.org/html/2411.04468v1)]. Any architecture that assumes these privileged features must be considered unrealistic (Class C) for the target deployment surface. The analysis must constantly distinguish between what the paper describes and what is pragmatically reproducible.
+
+**Benchmark overfitting** is another significant risk. Systems that achieve state-of-the-art results on specific benchmarks like FIRE-Bench may excel at rediscovering known scientific facts but struggle with open-ended, creative tasks like ontology development, which lacks standardized evaluation criteria [[222](https://arxiv.org/html/2602.02905v1)]. The evaluation suite Sage was created specifically to address the lack of reliable human annotation for judging LLM outputs, highlighting the difficulty of assessment [[113](https://arxiv.org/html/2512.16041v1)]. A plugin designed to work on a specific benchmark may fail spectacularly when faced with a novel, unconstrained problem. This underscores the need for architectures that are robust and generalizable, not just optimized for a particular dataset.
+
+Furthermore, many complex systems are prone to **fragile failure modes** that are difficult to predict and debug. Multi-agent debates, for instance, can suffer from coherence loss, where an error in one agent cascades and causes the entire system to collapse [[68](https://arxiv.org/pdf/2603.09002)]. Competitive dynamics can lead to over-competition, where agents undermine each other's performance instead of collaborating, resulting in lower overall accuracy and reliability [[233](https://arxiv.org/html/2509.26126v1)]. The persistence of latent states in LLMs is also questionable; the "Persistence Hypothesis" suggests agents should maintain fixed latent variables, but recent work shows this is often not the case, leading to unpredictable behavior [[236](https://arxiv.org/html/2505.10571v5)]. These systemic issues make complex, tightly coupled architectures risky for a production environment where reliability and safety are paramount [[78](https://arxiv.org/pdf/2512.18733)].
+
+Finally, there is a risk of **evaluator bias and rhetoric-over-truth selection**. Authors naturally want to highlight the strengths of their work, and this can lead to a biased presentation of results. The "AI discourse" found in pretraining data can subtly influence a model's alignment, sometimes making it less aligned than expected [[107](https://arxiv.org/html/2601.10160v2)]. When evaluating a methodology, it is crucial to scrutinize the evaluation protocol itself. Was the system tested against strong baselines? Were the failure cases analyzed? Is the claimed advantage substantial enough to justify the added complexity? For example, while multi-agent debate has shown promise, its benefits can be task-dependent, and simpler methods may perform comparably on some metrics [[94](http://lonepatient.top/2026/03/13/arxiv_papers_2026-03-13)]. An adversarial auditor must look for negative findings, limitations, and cases where a seemingly attractive method likely fails under the target use-case or packaging model. This critical stance ensures that the final recommended architecture is built on a foundation of substance, not hype.
+
+## **Synthesized Architecture: A Tension-Aware, Reflective Synthesizer**
+
+Based on the preceding analysis, a hybrid, modular architecture is recommended. This architecture is not a monolithic system but a composable skill ecosystem built around a central object: the `ConceptualTension`. It prioritizes the core requirements of contradiction handling, novelty preservation, and consequence generation while adhering strictly to the constraints of a plugin-based delivery model. The design separates functionality into distinct modules, specifying clearly which parts are directly implementable (Class A), which require optional external services (Class B), and which are intentionally excluded (Class C).
+
+The core of the architecture is a workflow centered on three sequential modules: Generator, Reflection, and Synthesizer. This workflow embodies a dialectical process inspired by Hegelian philosophy, where a thesis and antithesis are resolved into a more comprehensive synthesis [[148](https://www.microsoft.com/en-us/research/wp-content/uploads/2025/02/2501.14917v3.pdf), [184](https://arxiv.org/html/2501.14917v3)]. The entire process is managed within the plugin's local state, using a file-based log to persist the history of the conceptual exploration.
+
+**1. Generator Module (Class A - Direct Plugin Implementation):**
+*   **Role:** To initiate the process by generating a set of divergent candidate theories or ontological structures from a given seed concept or initial problem statement.
+*   **Mechanism:** This module implements a simplified evolutionary heuristic. Instead of a computationally expensive population-based search, it generates N variations on a theme using prompt-based mutation techniques. For example, it might take an initial concept and generate variants by rephrasing it from the perspective of a different philosophical school, applying negation ("What if the opposite were true?"), or adding a constraint from a different domain. This preserves diversity and supports **novelty preservation** without incurring prohibitive costs, addressing a key weakness of more rigid approaches. The output is a collection of candidate theories, each stored as a JSON object containing the theory's text and a metadata field for later critique.
+
+**2. Reflection Module (Class A - Direct Plugin Implementation):**
+*   **Role:** To act as a dedicated critic, evaluating each candidate theory generated by the Generator against a predefined rubric of epistemic virtues.
+*   **Mechanism:** Based on the SELF-REFINE pattern, this module takes a candidate theory and prompts the LLM to perform a self-evaluation [[105](https://www.researchgate.net/publication/369740347_Self-Refine_Iterative_Refinement_with_Self-Feedback)]. The prompt instructs the model to critique the theory's coherence, parsimony, explanatory power, generativity, and any internal contradictions. The output is a structured JSON object containing the critique, which is then appended to the candidate's metadata. This module directly addresses the need for **contradiction handling** by forcing the articulation of logical flaws and ambiguities. While self-evaluation can be unreliable, its use here is limited to a specific, well-defined task (critiquing a short text), which increases its chances of success. The entire process runs locally within the plugin.
+
+**3. Synthesizer Module (Class A/B - Hybrid Implementation):**
+*   **Role:** To integrate the Generator and Reflection modules to actively manage and resolve conceptual tensions.
+*   **Mechanism:** This module is the heart of the dialectical engine. It first identifies pairs of candidate theories that have received strong, contradictory critiques from the Reflection module. It then prompts the LLM to act as a dialectician, tasked with creating a third, synthetic theory that resolves the identified tension. This directly implements the thesis-antithesis-synthesis loop. The module also handles **conceptual consequence generation** by prompting the LLM to deduce the nontrivial implications of the newly synthesized theory. If an optional external service is connected (Class B), this module would also query a knowledge graph to see if the new theory introduces new, testable links or consequences, grounding the synthesis in existing knowledge. This makes the Synthesizer the most flexible component, adaptable to both offline and online environments.
+
+**4. Memory Module (Class A/B - Hybrid Implementation):**
+*   **Role:** To manage the history of the conceptual exploration, allowing the agent to build upon its previous work.
+*   **Mechanism:** The plugin maintains a local, append-only file-based log of all generated candidates, their reflections, and the synthesized outcomes. This satisfies the local memory constraint (Class A) and ensures the system's history is transparent and inspectable. If a user provides an optional external service, such as a lightweight vector database or a simple KG endpoint, this log can be indexed for faster similarity searches and more advanced retrieval. This would fall under Class B and would enhance the Synthesizer's ability to find relevant prior work and ground its output in a broader knowledge base.
+
+This architecture explicitly excludes several classes of mechanisms deemed unrealistic for a plugin. Complex, multi-agent orchestration (Class C) is avoided by using a single, reflective agent. Full-fledged evolutionary search (Class C) is replaced by a simple, prompt-based diversification heuristic. Proprietary ranking services (Class C) are not used; instead, synthesis is driven by the dialectical process. The design is modular, with clear interfaces between modules, allowing users to potentially replace or augment components (e.g., swapping the Generator for a different novelty-promoting technique) while keeping the core dialectical workflow intact. This promotes composability and adaptability within the plugin ecosystem.
+
+## **Comparative Paradigm Evaluation and Final Recommendations**
+
+To distill the extensive analysis into actionable recommendations, this section presents a comparative evaluation of several paradigm options for a theory-forging engine. Each paradigm is assessed against the core requirements of the user's goal, its plugin-feasibility, and its primary strengths and weaknesses. The final recommendation is a staged hybrid architecture that leverages the best aspects of several paradigms while remaining firmly within the bounds of realistic implementation.
+
+The following table summarizes the comparison of six key paradigms:
+
+| Paradigm Option | Best Case Scenario | Main Weakness | Where it Beats Others | Where it Fails | Plugin Feasibility Judgment |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Tournament/Evolutionary Search** | Systematically explores a vast candidate space, discovering novel and optimal solutions by mimicking natural selection. | Extremely high computational and orchestration cost; requires privileged infrastructure for large-scale populations. | Superior for novelty preservation and navigating complex trade-offs (Pareto optimization). | Unrealistic for a plugin due to prohibitive resource requirements. | **C (Unrealistic)** |
+| **Reflection-Centered Deliberation** | A single agent iteratively refines its output, improving internal consistency and polishing a concept through self-critique. | Limited generative power; primarily refines existing knowledge rather than creating radical novelty. | Highly efficient, debuggable, and easy to implement within a plugin's constraints. | Cannot handle deep contradictions or initiate new conceptual directions on its own. | **A (Direct Plugin)** |
+| **Graph-First Ontology Engine** | Starts with a structured knowledge graph, ensuring logical consistency and providing a solid foundation for reasoning. | High rigidity and brittleness; can stifle radical new conceptualizations that don't fit the existing schema. | Excellent for formal reasoning, consequence tracing, and maintaining coherence once an ontology exists. | Poor at generating novel ontologies from scratch and can become overly conservative. | **B (External Service)** |
+| **Retrieval/Synthesis Engine** | Grounds all generation in a corpus of existing knowledge, producing outputs that are factually consistent and relevant. | Over-reliance on retrieval can stifle generativity and turn the system into a passive curator of existing ideas. | Strong at synthesizing information from multiple sources and ensuring fidelity to provided data. | Fails at generating truly novel hypotheses not present in the source material. | **B (External Service)** |
+| **Developmental/Tension-Preserving Architecture** | Models theory development as a gestation process, actively cultivating tensions and preserving ambiguity until they resolve organically. | Difficult to implement; the concept of "cultivation" lacks a clear mechanistic implementation in current LLMs. | Potentially the most epistemologically sound for nurturing complex, multifaceted theories. | Unproven and likely too abstract to be reliably implemented as a deterministic plugin. | **C (Unrealistic)** |
+| **Consequence-Testing Architecture** | Driven by abductive inference, it generates hypotheses to explain observations and rigorously tests their consequences. | Requires external contact for meaningful testing; LLMs' ability to perform robust counterfactual reasoning is still developing. | Explicitly generates nontrivial downstream consequences, fulfilling a core requirement of the user's goal. | Without external validation, the "testing" is a weak linguistic exercise. | **A/B (Hybrid)** |
+
+From this comparison, a clear path forward emerges. No single paradigm is perfect. Tournament search is powerful but unrealistic. Graph-first approaches are rigid. Simple reflection is too narrow. The most promising approach is a **staged hybrid architecture** that combines the strengths of the most feasible paradigms.
+
+**Final Recommendation: A Two-Stage, Tension-Aware Synthesizer**
+
+The recommended starting point is a two-stage process:
+
+1.  **Stage 1: Divergence and Critique (Reflection-Centered & Tension-Preserving Principles).** The system begins by generating a set of divergent hypotheses (using principles from evolutionary search) and then subjects them to rigorous self-critique (using principles from reflection). This stage focuses on maximizing novelty and surfacing contradictions.
+2.  **Stage 2: Synthesis and Consequence Generation (Consequence-Testing & Graph-First Principles).** The system then takes the most promising, and often contradictory, candidates and forces them into a dialectical synthesis. It uses abductive reasoning to generate a new, more comprehensive theory and then deduces its consequences. If an external service is available, this stage can be grounded in a knowledge graph.
+
+This staged approach directly addresses the user's core requirements:
+*   **Contradiction Handling:** Achieved through the dialectical synthesis of contradictory critiques.
+*   **Novelty Preservation:** Supported by the initial divergence stage and the open-ended nature of the synthesis process.
+*   **Cross-Frame Synthesis:** Enabled by generating initial hypotheses from varied perspectives.
+*   **Conceptual Consequence Generation:** A core function of the synthesis stage, driven by abductive inference.
+
+This architecture is delivered as a modular skill ecosystem with three clear tiers:
+
+**Minimal Plugin-Version (Capturing Core Value):**
+*   **Description:** Implements the entire two-stage process (Generator, Reflection, Synthesizer) as a Class A (Direct Plugin) solution.
+*   **Components:** All logic is contained within the plugin's prompt workflows and a local file-based memory log. It requires no external services.
+*   **Value Proposition:** A self-contained, reliable, and efficient tool for generating, critiquing, and synthesizing conceptual frameworks entirely within the user's environment.
+
+**Full Plugin-Plus Version (Enhanced Capabilities):**
+*   **Description:** Builds upon the minimal version by adding a connector for an optional external service (Class B).
+*   **Components:** The Synthesizer module gains the ability to query an external knowledge graph or vector store. This allows it to ground its output in existing knowledge, retrieve relevant prior art, and validate its consequences against a broader semantic network.
+*   **Value Proposition:** A more powerful and informed version of the synthesizer, capable of producing more robust and contextually aware theories.
+
+**Out-of-Scope but High-Upside Version:**
+*   **Description:** A fully autonomous, multi-agent system where agents specialize in different domains or philosophical schools.
+*   **Why it's Unrealistic:** This paradigm requires privileged infrastructure for complex, asynchronous orchestration, continuous background execution, and sophisticated state management—all of which violate the plugin constraints. It represents a "moonshot" that is currently confined to research labs with proprietary platforms.
+
+This tiered, modular approach provides a clear and pragmatic roadmap. It delivers immediate value with the minimal plugin, offers a scalable upgrade path with the plugin-plus version, and acknowledges the limits of the current technology while pointing toward future possibilities. The core recommendation is to start with the minimal plugin-version, as it is the most realistic, reliable, and widely deployable option that still captures the essential epistemic pressures needed for effective theory-forging.
+
+## **Open Problems and Unknowns**
+
+Despite the comprehensive analysis, several critical open problems and unknowns remain. Addressing these will be key to advancing the field of plugin-based theory-forging engines.
+
+First, there is **no reliable metric for quantifying productive tension**. The system can be designed to identify contradictions, but determining whether a given tension is "productive"—i.e., likely to lead to a richer, more accurate theory—is currently a matter of human judgment. Developing automated heuristics or indicators for this remains a significant research challenge.
+
+Second, the problem of **long-term, coherent memory** is unresolved. While a local file-based log solves the immediate problem of session persistence, managing a coherent and useful memory across multiple, disconnected plugin sessions is a major unsolved issue in agent research [[172](https://pmc.ncbi.nlm.nih.gov/articles/PMC10400413/), [236](https://arxiv.org/html/2505.10571v5)]. How to prevent knowledge decay, manage forgetting, and maintain a consistent identity or perspective over time is not well understood.
+
+Third, **evaluator bias** persists even in simple mechanisms. The practice of self-reflection, while more controllable than multi-agent debate, is still susceptible to the inherent biases and tendencies of the underlying LLM. Research has shown that the discourse present in an LLM's training data can influence its behavior in subtle ways, a phenomenon that could affect the fairness and objectivity of a reflection module [[107](https://arxiv.org/html/2601.10160v2)]. Mitigating these latent biases is a foundational challenge for ensuring the reliability of any AI-assisted reasoning system [[97](https://openreview.net/pdf?id=oVTkOs8Pka)].
+
+Fourth, the **gap between simulation and reality** remains a fundamental limitation. For tasks requiring empirical validation, a plugin is necessarily limited to generating hypothetical consequences. While counterfactual reasoning is a powerful tool, it cannot replace the ultimate pressure of experimental data [[21](https://aclanthology.org/2024.acl-long.593.pdf), [22](https://openreview.net/forum?id=aya06N6R4W)]. The ability of LLMs to generate plausible but incorrect counterfactuals is a known failure mode. Until agents can seamlessly and safely integrate with external simulators or APIs, this gap will limit the depth of inquiry possible in a purely textual environment [[222](https://arxiv.org/html/2602.02905v1)].
+
+Finally, the **scalability of complex reasoning patterns** is an open question. While simple reflection and synthesis loops are manageable, scaling these processes to handle increasingly complex domains with thousands of interconnected concepts remains a significant challenge. The combinatorial explosion of possibilities and the difficulty of maintaining coherence in long, multi-step reasoning chains are active areas of research that will determine the upper limits of what is possible in a plugin-based architecture [[68](https://arxiv.org/pdf/2603.09002)].
+
+
+The Internal Skills Marketplace: A Production-Ready Architecture for Scientific Agents
+This document defines the complete operational design space for an agentic scientific scaffolding system. It translates the theoretical map of 19 ontological families into a strictly bounded, production-ready "Skills Marketplace."
+Agentic scaffolding is defined here as the set of externalized representations, control-flow regimes, memory/provenance artifacts, coordination patterns, evaluators/verifiers, tool-boundaries, and oversight interfaces that shape research behavior over long-horizon, uncertainty-dense workflows.
+The core directive of this architecture—the closest metric to a universal best practice in the literature—is to separate evaluation from generation architecturally, not just logically. To achieve this, the agent orchestrates single-purpose plugins built upon an irreducible basis of seven core primitives.
+0. The Irreducible Primitive Basis
+The full theoretical space of agentic scaffolding reduces to exactly seven operational primitives that survive across all architectural models. Every marketplace skill is a composite of these foundational functions:
+Generate: Instantiate new candidate structures or text.
+Evaluate: Execute judgment, scoring, or formal verification.
+Persist: Write to long-term state or provenance-mapped memory.
+Retrieve: Fetch external literature or internal state history.
+Route: Determine the next operational node or stage transition.
+Halt: Trigger optimal stopping conditions to prevent infinite loops.
+Log: Record path history, including failed branches.
+1. The Generative Layer: The "Incubator"
+Function: Divergent hypothesis generation, problem decomposition, and deliberate expansion of the probability space. Constraint: Strictly isolated from evaluative pressure. No ranking, scoring, or dismissal permitted during execution.
+Core Skills
+Hierarchical Decomposer (Route, Generate): Breaks high-level goals into a stage-gated taxonomy of sub-problems.
+Novelty Preserver (Generate, Persist): Generates alternative lineages and intentionally protects fragile, non-consensus hypotheses from immediate empirical crushing.
+Dialectical Generator (Generate): Forces the creation of a counter-hypothesis for every primary hypothesis to maintain productive tension.
+🛡️ Resolved Anti-Pattern: Premature Synthesis
+Monolithic agents collapse the probability space early by evaluating ideas while generating them. The Incubator forces parallel, protected exploration, preserving genuine novelty.
+2. Stage Transition Gates (The Micro-Evaluators)
+Function: Preventing ontological bleed between the Incubator and the Crucible. Constraint: Evaluation must run at every stage transition, not just at the final output.
+The literature explicitly mandates checking assumptions at boundary lines. Before any hypothesis passes from generation to formal evaluation, it must pass a transition gate.
+Skill: Ontological Boundary Checker (Evaluate, Route): Ensures that assumptions made in a creative/heuristic state do not silently violate the requirements of a formal/logical state.
+3. The Evaluative Layer: The "Crucible"
+Function: Rigorous critique, formalization, logical stress-testing, and competitive selection. Constraint: Must execute on different model weights, distinct prompting paradigms, or separate modalities (e.g., symbolic solvers) from the Generative Layer.
+Core Skills
+Epistemic Verifier (Evaluate, Log): Actively attempts to falsify Incubator outputs by translating natural language into formal logic or routing to external math verifiers.
+Grounding Assessor (Evaluate, Retrieve): Measures the semantic distance between generated hypotheses and established canon, explicitly flagging ungrounded hallucinations.
+Dynamic Halting Monitor (Evaluate, Halt): Calculates the optimal stopping condition to prevent infinite loops of self-critique and caveat-generation.
+🛡️ Resolved Anti-Pattern: Evaluator Bias & Goodhart's Law
+Self-correction universally fails when a model evaluates its own output in the same context window (sycophancy). Architectural separation guarantees adversarial, truth-tracking evaluation.
+4. The Tooling Layer: The "Tether"
+Function: Interaction with the external world and bounded tool execution. Constraint: Execution is sandboxed, logged, and operates on the principle of least privilege.
+Core Skills
+Provenance-Mapped Retriever (Retrieve, Persist): Fetches literature but is required to attach explicit citation metadata to every injected token. Forbidden from executing epistemic judgment.
+Sandboxed Simulator (Route, Log): Executes generated code or external simulation APIs (e.g., computational chemistry solvers).
+🛡️ Resolved Anti-Pattern: Retrieval Dominance & Tool Sprawl
+Prevents retrieval mechanisms from replacing epistemic judgment with availability bias. Sandboxing prevents injection cascades from compromising the agent's core cognitive loop.
+5. The Orchestration Layer: The "Weaver"
+Function: Managing state-space, resolving tensions, pruning the graph, and synthesizing final outputs. Constraint: Maintains the global memory graph and ruthlessly enforces state-machine transitions.
+Core Skills
+State-Space Logger (Persist, Log): Maintains an immutable log of all paths taken, explicitly recording failed branches to prevent hidden memory path dependence.
+Combinatorial Pruner (Evaluate, Halt): Aggressively trims dead-end or mathematically identical lineages to prevent the system from suffering a combinatorial state explosion.
+Abductive Synthesizer (Generate, Evaluate): Attempts to merge surviving, tested ontologies without losing coherence to find "the best explanation."
+Contextual Router (Route): The master controller determining macro-transitions between the Incubator, Crucible, and Tether.
+6. Verified Limits and Unresolved Tensions
+Even with architectural separation and bounded tool use, this production model operates against three structurally real limits documented in the literature:
+The Abductive Bottleneck: Implementing and assessing true abductive reasoning (the Synthesizer skill) remains a formidable, unsolved challenge. The system is highly prone to forcing false consensus rather than genuine synthesis.
+The Simulation vs. Reality Gap: For tasks requiring empirical validation, the Tether is limited to generating hypothetical consequences. LLMs generating plausible but incorrect counterfactuals is a known failure mode; API simulators cannot fully replace the pressure of physical experimental data.
+Exploration vs. Selection: Finding the mathematical "optimal stopping condition" for when to move a fragile idea out of the Incubator and into the Crucible remains an active frontier constraint.
+
+---
+
+## Honest triangulation across all four proposals
+
+You've got four distinct architectural bets on the table:
+
+**My proposal** (previous turn): Empirically grounded, skill-by-skill, stage-router as the connective tissue, honest about what can't be skill-ified.
+
+**Z.ai PDF**: Structurally rigorous, layer-model framing, weakest on empirical grounding, but has the cleanest anti-pattern → mitigation table.
+
+**Co-Scientist doc** (Dialectical blueprint): Makes the explicit bet that Dialectical ontology is primary. Generator → Reflection → Synthesizer as the core loop. Class A/B/C feasibility classification is genuinely useful. Honestly handles the "simpler synchronous debate is Class A, full multi-agent is Class C" distinction.
+
+**Gemini proposal**: The most production-minded. Seven-primitive basis is real and I independently derived the same seven. The Incubator/Crucible/Tether/Weaver layer naming is evocative and actually maps well. The "evaluated at stage transition, not just final output" mandate is the strongest single sentence in any of the four documents.
+
+---
+
+## Where they genuinely converge
+
+Three things all four independently surface:
+
+**Evaluator separation is load-bearing.** Every document says it differently but arrives at the same place. Gemini puts it most operationally: different model weights, distinct prompting paradigms, or separate modalities. That's the right level of specificity.
+
+**Stage collapse is the dominant failure mode.** All four identify premature synthesis/ranking/formalization as the thing that kills research agents most reliably. The Gemini doc's "Incubator constraint: no ranking, scoring, or dismissal permitted during execution" is the cleanest expression of this.
+
+**The seven primitives are real.** Generate, Evaluate, Persist, Retrieve, Route, Halt, Log. These recur across all four documents independently. That convergence is signal, not coincidence.
+
+---
+
+## Where they diverge meaningfully
+
+**The Dialectical-as-primary bet.** The Co-Scientist doc is the only one that makes Dialectical ontology the organizing center. The research map explicitly says don't assume one family is primary — but for *your specific use case* (theory-forging, ontology engineering, research as you actually do it), the dialectical frame is probably the most honest description of how you actually think. It's a reasonable design bet for your pack specifically, even if it's not a general claim.
+
+**Class A/B/C vs. stage-aware routing.** The Co-Scientist doc's feasibility classification is the most useful framework for what's actually buildable. Gemini's layer architecture is the most production-ready structural frame. My proposal's stage-router concept is the connective tissue neither of the others fully solves.
+
+**What "synthesis" means.** The Co-Scientist doc means dialectical thesis-antithesis-synthesis. Gemini means abductive best-explanation. These are genuinely different operations with different failure modes. The Co-Scientist version fails toward forced consensus. The abductive version fails toward linguistically plausible but empirically ungrounded conclusions.
+
+---
+
+## The synthesis: what the actual skill pack should be
+
+Taking the strongest elements from all four:
+
+**Structural frame:** Gemini's Incubator/Crucible/Tether layer separation, because it most clearly encodes the generation-evaluation independence mandate.
+
+**Primitive basis:** The seven-primitive basis, because it's independently derived across sources and gives you a compositional foundation for every skill.
+
+**Feasibility filter:** Co-Scientist's Class A/B/C classification applied to every skill before building it.
+
+**Connective tissue:** My stage-router concept, because without it you have a bag of skills with no coordination logic.
+
+**Anti-pattern mandate:** Z.ai's anti-pattern → mitigation table structure, applied per-skill during build.
+
+Here's what the pack actually looks like when you run it through all four lenses:
+
+---
+
+### Tier 0: The primitive basis (not skills — the substrate everything else composes from)
+
+Generate, Evaluate, Persist, Retrieve, Route, Halt, Log. These aren't built as separate skills. They're the vocabulary that every skill's SKILL.md body is written in. This is a design constraint, not a deliverable.
+
+---
+
+### Tier 1: Incubator skills (generation-side, evaluation-isolated)
+
+**`hypothesis-forge`** — Class A. Divergent generation with novelty pressure, anti-canon prompting, sequential (not parallel) sampling to prevent mode collapse. Dialectical generator variant: for every hypothesis, force a counter-hypothesis. Degeneration guard: no scoring, no ranking, no dismissal in this skill.
+
+**`incubation-protocol`** — Class A. Maturity scoring rubric, stage-gate criteria, protected lineage tracking. Explicit constraint: ideas stay in incubation until they've survived the boundary checker.
+
+**`divergence-guard`** — Class A. Anti-retrieval-dominance pressure, diversity budgets, verbalized sampling instructions. Honest limitation: population-level diversity mechanisms require architecture; this skill approximates them instructionally.
+
+---
+
+### Tier 2: Stage-gate (the boundary enforcement)
+
+**`ontological-boundary-checker`** — Class A. The most important skill in the pack and the one nobody else has explicitly named as a standalone. Checks that assumptions valid in generative/heuristic state don't silently violate requirements of evaluative/formal state. Runs at every stage transition. Primitive composition: Evaluate + Route.
+
+---
+
+### Tier 3: Crucible skills (evaluation-side, architecturally separated)
+
+**`claim-auditor`** — Class A. Claim/evidence separation, verification rubric, calibration marking. Evaluator separation instruction: explicitly invoke with different prompting stance than generation context.
+
+**`epistemic-verifier`** — Class A/B. Falsification attempts, formal logic translation where possible, external math verifier routing (Wolfram) where available. Extends your existing wolfram-language-engineer skill.
+
+**`grounding-assessor`** — Class A. Semantic distance measurement between generated hypotheses and established literature. Anti-hallucination grounding. MCP leverage: HuggingFace paper search, web retrieval.
+
+**`dynamic-halting-monitor`** — Class A. Stopping criteria enforcement, infinite-loop detection, self-critique cascade prevention. This is the skill nobody builds until their agent goes infinite and costs them $200 in tokens.
+
+---
+
+### Tier 4: Tether skills (external contact, sandboxed)
+
+**`literature-scout`** — Class A. Provenance-mapped retrieval — every injected piece of literature carries citation metadata, explicitly forbidden from executing epistemic judgment. Anti-retrieval-dominance guards.
+
+**`lab-executor`** — Class B. Sandboxed tool invocation, observation logging, result interpretation separation. MCP leverage: BigQuery, external APIs. Honest: consequence testing without external simulation is linguistic exercise.
+
+---
+
+### Tier 5: Weaver skills (synthesis and coordination)
+
+**`abductive-synthesizer`** — Class A/B. The hardest skill to build correctly. Merges surviving tested hypotheses without forcing false consensus. Failure mode is exactly what the Co-Scientist doc says: rhetoric-over-truth selection. Needs explicit anti-consensus pressure built into the prompt.
+
+**`research-lineage`** — Class A/B. Immutable path log, failed-branch recording, stage transition history, lineage ancestry. Craft MCP for persistent notes. Linear MCP for structured tracking.
+
+**`research-stage-controller`** — Class A, highest-risk build. The master router. Determines Incubator → Gate → Crucible → Tether → Weaver transitions. Without this, everything else is uncoordinated.
+
+---
+
+## Honest assessment of the Gemini proposal's strongest contribution
+
+The "Ontological Boundary Checker as a standalone skill at every stage transition" — that's the insight I didn't have clearly enough in my previous turn. That's the mechanism that prevents stage collapse at the architectural level rather than just instructionally. It should be the second skill you build, right after `claim-auditor`.
+
+## What none of the four proposals fully solves
+
+The abductive synthesizer failure mode. Forcing thesis-antithesis-synthesis on ideas that don't have a genuine resolution produces pseudo-synthesis — linguistically smooth, epistemically hollow. The Co-Scientist doc names this but doesn't solve it. The Gemini doc calls it "The Abductive Bottleneck" and correctly identifies it as an unresolved frontier constraint.
+
+The honest answer: build the synthesizer last, use it most cautiously, and treat its outputs as candidates requiring crucible evaluation rather than finalized conclusions.
+
+---
+
