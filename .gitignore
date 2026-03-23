@@ -5,3 +5,10 @@ __pycache__/
 .coverage
 htmlcov/
 .env
+*.egg-info/
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
