@@ -11,10 +11,8 @@ Evidence-anchored agentic scaffolding for scientific reasoning.
 - ✅ C2: GENERATE → EVALUATE → SELECT (temporal order)
 - ✅ C3: Diversity quota at SELECT (with auto-regenerate)
 - ✅ C4: LOG all EVALUATE operations (audit interceptor)
+- ✅ C5: MEMORY decay policy (cleanup + auto-cron scheduler)
 - ✅ C6: ACT sandbox enforcement
-
-**Partial Implementation:**
-- 🟡 C5: MEMORY decay policy (cleanup function exists, auto-cron pending)
 
 ## Installation
 
@@ -67,7 +65,7 @@ survivors = select(scored, diversity_quota=0.4)
 | C2 | GENERATE → EVALUATE → SELECT (temporal order) | ✅ Enforced |
 | C3 | DIVERSITY quota at SELECT | ✅ Enforced + auto-regenerate |
 | C4 | LOG all EVALUATE operations | ✅ Enforced (audit interceptor) |
-| C5 | MEMORY decay policy | 🟡 Cleanup function exists |
+| C5 | MEMORY decay policy | ✅ Cleanup + auto-cron scheduler |
 | C6 | ACT sandbox enforcement | ✅ Enforced |
 
 ## Testing
@@ -76,7 +74,17 @@ survivors = select(scored, diversity_quota=0.4)
 pytest --cov=compositional_co_scientist --cov-branch --cov-fail-under=80
 ```
 
-Current: 57 tests passing, 91%+ coverage
+**Current Metrics:**
+- **80 tests** (77 passed, 3 skipped)
+- **87.61% branch coverage** (exceeds 80% target)
+
+## Documentation
+
+- **Getting Started**: [`docs/user-guide/getting-started.md`](docs/user-guide/getting-started.md)
+- **API Reference**: [`docs/user-guide/api-reference.md`](docs/user-guide/api-reference.md)
+- **Tutorials**: [`docs/tutorials/`](docs/tutorials/)
+  - Tutorial 1: Basic Hypothesis Generation Workflow
+  - Tutorial 2: Retrieval-Augmented Generation
 
 ## License
 
